@@ -6,7 +6,9 @@
     <entry>
       <title><![CDATA[java finalize方法]]></title>
       <url>http://yoursite.com/2016/08/27/java-finalize%E6%96%B9%E6%B3%95/</url>
-      <content type="html"><![CDATA[<h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章"></a>为什么写这篇文章</h3><p>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
+      <content type="html"><![CDATA[<p>为什么写这篇文章?<br>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
+<a id="more"></a>
+<h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
 <p>题外话：以前看Java GC相关内容主要为的是应付面试而已，不过最近有个同事提了个问题(问题你么先YY)，但他只说了对象会被回收，具体细节并没有说出，进而引发我再次探究GC<br>估计下次会以此问题展开讨论，由于我也是个菜鸟需要大家指出文章中的不足，谢谢！</p>
 <h3 id="Java-finalize方法"><a href="#Java-finalize方法" class="headerlink" title="Java finalize方法"></a>Java finalize方法</h3><p>finalize方法是Object类的方法，任何类都是重写finalize方法，实现自己想要的功能。<br>默认的finalize方法什么也没做</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">finalize</span><span class="params">()</span> <span class="keyword">throws</span> Throwable </span>&#123; &#125;</div></pre></td></tr></table></figure>
