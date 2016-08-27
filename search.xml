@@ -37,7 +37,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">cn.base.gc.test.Test1@6b04d3c8</div><div class="line">[GC 2642K-&gt;437K(251392K), 0.0012310 secs]</div><div class="line">[Full GC 437K-&gt;350K(251392K), 0.0102620 secs]</div><div class="line">Test1 finalize...</div><div class="line">Test2 finalize...</div><div class="line">cn.base.gc.test.Test1@6b04d3c8</div><div class="line">jokeris 18</div><div class="line">[GC 2992K-&gt;446K(251392K), 0.0006800 secs]</div><div class="line">[Full GC 446K-&gt;350K(251392K), 0.0069980 secs]</div><div class="line">done.</div></pre></td></tr></table></figure>
 <p>可以看到的是我们在释放test1的时候成员对象test2也一起被回收了，由于test1重写了finalize<br>方法，在最后test1又复活了。</p>
 <p>由于在GC Root中又有引用链起死回生，但是我么再一次设置null并执行gc可以看到test1对象<br>没有在进入finalize方法了。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>finalize方法不是每次都会执行的，并且重写finalize方法最好不要使对象再生，这样容易造成<br>对象的生命周期混乱！</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>finalize方法不是每次都会执行的，使用System.gc()<br>也只不过是加快gc调用，并且重写finalize方法最好不要使对象再生，这样容易造成<br>对象的生命周期混乱！</p>
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://mazhuang.org/2015/12/15/java-object-finalize/" target="_blank" rel="external">http://mazhuang.org/2015/12/15/java-object-finalize/</a><br><a href="http://bijian1013.iteye.com/blog/2289661" target="_blank" rel="external">http://bijian1013.iteye.com/blog/2289661</a></p>
 ]]></content>
     </entry>
