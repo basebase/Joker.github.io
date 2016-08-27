@@ -84,12 +84,21 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="小墨鱼">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="为什么写这篇文章要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? 
+题外话：以前看Java GC相关内容主要为的是应付面试而已，不过最近有个同事提了个问题(问题你么先YY)，但他只说了对象会被回收，具体细节并没有说出，进而引发我再次探究GC估计下次会以此问题展开讨论，由于我也是个菜鸟需要大家指出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java finalize方法">
+<meta property="og:url" content="http://yoursite.com/2016/08/27/java-finalize方法/index.html">
 <meta property="og:site_name" content="小墨鱼">
+<meta property="og:description" content="为什么写这篇文章要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? 
+题外话：以前看Java GC相关内容主要为的是应付面试而已，不过最近有个同事提了个问题(问题你么先YY)，但他只说了对象会被回收，具体细节并没有说出，进而引发我再次探究GC估计下次会以此问题展开讨论，由于我也是个菜鸟需要大家指出">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java-finalize%E6%96%B9%E6%B3%95/gc.gif?raw=true">
+<meta property="og:updated_time" content="2016-08-27T14:59:18.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小墨鱼">
+<meta name="twitter:title" content="java finalize方法">
+<meta name="twitter:description" content="为什么写这篇文章要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? 
+题外话：以前看Java GC相关内容主要为的是应付面试而已，不过最近有个同事提了个问题(问题你么先YY)，但他只说了对象会被回收，具体细节并没有说出，进而引发我再次探究GC估计下次会以此问题展开讨论，由于我也是个菜鸟需要大家指出">
+<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/java-finalize%E6%96%B9%E6%B3%95/gc.gif?raw=true">
 
 
 
@@ -110,9 +119,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/08/27/java-finalize方法/"/>
 
-  <title> 小墨鱼 </title>
+  <title> java finalize方法 | 小墨鱼 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -133,9 +142,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -235,9 +242,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
 
   
@@ -264,10 +271,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/08/27/java-finalize方法/" itemprop="url">
-                  java finalize方法
-                </a>
+                java finalize方法
               
             
           </h1>
@@ -316,9 +320,7 @@
       
 
       
-        
-          
-            <h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章"></a>为什么写这篇文章</h3><p>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
+        <h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章"></a>为什么写这篇文章</h3><p>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
 <p>题外话：以前看Java GC相关内容主要为的是应付面试而已，不过最近有个同事提了个问题(问题你么先YY)，但他只说了对象会被回收，具体细节并没有说出，进而引发我再次探究GC<br>估计下次会以此问题展开讨论，由于我也是个菜鸟需要大家指出文章中的不足，谢谢！</p>
 <h3 id="Java-finalize方法"><a href="#Java-finalize方法" class="headerlink" title="Java finalize方法"></a>Java finalize方法</h3><p>finalize方法是Object类的方法，任何类都是重写finalize方法，实现自己想要的功能。<br>默认的finalize方法什么也没做</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">finalize</span><span class="params">()</span> <span class="keyword">throws</span> Throwable </span>&#123; &#125;</div></pre></td></tr></table></figure>
@@ -350,16 +352,20 @@
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>finalize方法不是每次都会执行的，并且重写finalize方法最好不要使对象再生，这样容易造成<br>对象的生命周期混乱！</p>
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://mazhuang.org/2015/12/15/java-object-finalize/" target="_blank" rel="external">http://mazhuang.org/2015/12/15/java-object-finalize/</a><br><a href="http://bijian1013.iteye.com/blog/2289661" target="_blank" rel="external">http://bijian1013.iteye.com/blog/2289661</a></p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
@@ -367,243 +373,51 @@
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/08/23/mapreduce计算uv/" rel="next" title="mapreduce计算uv">
+                <i class="fa fa-chevron-left"></i> mapreduce计算uv
+              </a>
             
-              
-                
-                <a class="post-title-link" href="/2016/08/23/mapreduce计算uv/" itemprop="url">
-                  mapreduce计算uv
-                </a>
-              
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
             
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-23T13:33:30+08:00" content="2016-08-23">
-              2016-08-23
-            </time>
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/23/mapreduce计算uv/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/23/mapreduce计算uv/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
       
 
       
-        
-          <p>为什么写这篇文件?<br>我们在统计的时候pv和uv可以说的最基础的也是最常见的，相信做数据的都知道。这种需求<br>我们一般就是使用hive进行统计就完事了，非常的简单。<br>根据url计算每个页面的访问次数和独立访客用户数。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/23/mapreduce计算uv/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
+
+    <div class="post-spread">
       
+        <div class="ds-share flat" data-thread-key="2016/08/27/java-finalize方法/"
+     data-title="java finalize方法"
+     data-content=""
+     data-url="http://yoursite.com/2016/08/27/java-finalize方法/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
 
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
 
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/11/storm整合kafka重复消费问题分析/" itemprop="url">
-                  storm整合kafka重复消费问题分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-11T21:43:29+08:00" content="2016-08-11">
-              2016-08-11
-            </time>
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/11/storm整合kafka重复消费问题分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/11/storm整合kafka重复消费问题分析/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
-      
-
-      
-        
-          <p>为什么写这篇文章?<br>最近在整合storm+kafka一直纠结于重复数据的读取，重新启动topology更是把kafka的数据扫描一遍，<br>【如果线上逻辑较重，并且还要往数据库里面插入数据是不是有很多重复数据了！】</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/11/storm整合kafka重复消费问题分析/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
@@ -611,6 +425,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/08/27/java-finalize方法/"
+           data-title="java finalize方法" data-url="http://yoursite.com/2016/08/27/java-finalize方法/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -630,8 +452,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://i01.pictn.sogoucdn.com/f83a9e9b980ed956"
@@ -667,6 +498,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么写这篇文章"><span class="nav-number">1.</span> <span class="nav-text">为什么写这篇文章</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-finalize方法"><span class="nav-number">2.</span> <span class="nav-text">Java finalize方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对象销毁过程"><span class="nav-number">3.</span> <span class="nav-text">对象销毁过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实践"><span class="nav-number">4.</span> <span class="nav-text">实践</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -763,6 +605,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
