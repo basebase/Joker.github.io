@@ -84,32 +84,20 @@
 
 
 
-<meta name="description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？
-问题的产生事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说
-    java方法中直接new对象返回和赋值返回有什么区别啊？
-
-然而，就有一位同事说出了gc，然后就没然后了！包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题">
+<meta name="description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="java返回引用和返回对象">
 <meta property="og:url" content="http://yoursite.com/2016/09/06/java返回引用和返回对象/index.html">
 <meta property="og:site_name" content="小墨鱼">
-<meta property="og:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？
-问题的产生事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说
-    java方法中直接new对象返回和赋值返回有什么区别啊？
-
-然而，就有一位同事说出了gc，然后就没然后了！包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题">
+<meta property="og:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？">
 <meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true">
 <meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/usedmem.png?raw=true">
 <meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc1.png?raw=true">
 <meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc2.png?raw=true">
-<meta property="og:updated_time" content="2016-09-06T14:47:49.000Z">
+<meta property="og:updated_time" content="2016-09-06T14:49:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="java返回引用和返回对象">
-<meta name="twitter:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？
-问题的产生事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说
-    java方法中直接new对象返回和赋值返回有什么区别啊？
-
-然而，就有一位同事说出了gc，然后就没然后了！包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题">
+<meta name="twitter:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？">
 <meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true">
 
 
@@ -347,7 +335,9 @@
       
 
       
-        <h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
+        <p>为什么写这篇文章?<br>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
+<a id="more"></a>
+<h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
 <h3 id="问题的产生"><a href="#问题的产生" class="headerlink" title="问题的产生"></a>问题的产生</h3><p>事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说</p>
 <font color="DeepPink"><br>    java方法中直接new对象返回和赋值返回有什么区别啊？<br></font>
 

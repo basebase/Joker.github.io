@@ -327,21 +327,12 @@
 
       
         
-          
-            <h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
-<h3 id="问题的产生"><a href="#问题的产生" class="headerlink" title="问题的产生"></a>问题的产生</h3><p>事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说</p>
-<font color="DeepPink"><br>    java方法中直接new对象返回和赋值返回有什么区别啊？<br></font>
-
-<p>然而，就有一位同事说出了gc，然后就没然后了！<br>包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题，只能说会被加入到F-Queue中，然后等待处理）。</p>
-<p>因为GC到底什么时候执行我么是不清楚的，不同的jvm有不同的算法。</p>
-<p>我本着一颗搜索的心，发现有人说java的new返回的是一个临时对象，然后我就各种搜索临时对象的资料<br>无果，全部都是C/C++的描述，由于我没有接触C/C++所以看的也有点云里雾里!</p>
-<p>后来经过大牛的指点，如下：</p>
-<font color="DeepPink"><br>    其实java没有临时的概念，不像c有栈空间上的对象。Java对象都是堆上的，通过引用操作对象<br></font><br>看到这里是不是一目了然了😝<br><br>当线程执行一个方法时，就会随之创建一个对应的栈帧，并将建立的栈帧压栈。当方法执行完毕之后，便会将栈帧出栈。我们知道局部变量都是放在栈中的。<br><br>来，看看下图<br><br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true" alt="jvm stack"><br><br>那么当方法返回结束了，这个对象是不是没有被引用了，也就加入到F-Queue中等待处理了。<br>而在return直接new返回也是一样的。<br><br>说到这里，我么基本上可以认为二者没有区别，如果有也是微乎其微的了。<br><br>### 实践<br><br><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Date <span class="title">getDate</span><span class="params">()</span> </span>&#123;</div><div class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Date();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">		System.out.println(<span class="string">"1"</span>);</div><div class="line">		Date date = getDate();</div><div class="line">		<span class="comment">//System.gc();</span></div><div class="line">		Thread.sleep(<span class="number">10000</span>);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure><br><br>下图是没有进行gc时候运行情况。<br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/usedmem.png?raw=true" alt="jvm stack"><br><br>上图程序我运行了好几次，但是大部分使用情况都如上，你么在运行的时候可以多测试看看。<br><br>然后把System.gc()的注释解开，在来观察一下。<br><br>运行情况良好的一次，如下图：<br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc1.png?raw=true" alt="jvm gc"><br><br>可以看到内存使用情况，gc确实执行了。<br><br>然而，我们在看看运行N次后的情况，为了下图我也是消耗了一些时间！！！<br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc2.png?raw=true" alt="jvm gc2"><br><br>我们可以看到内存使用情况，是不是还很高，这就说明了<br><font color="DeepPink"><br>    调用java的System.gc()不一定会执行GC操作<br></font>
-
-<p>好了，到这里就已经结束了，这里我写的是return new的返回，返回引用没有差别，当然你么自己<br>也可以测试一下😁</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实也不算是总结吧，也是今天看到的，在编写程序的时候尽量使用局部变量，这样可以有效的<br>控制内存，在方法结束的时候，栈中的数据会自动释放而不用我们操心了！！！</p>
-
-          
+          <p>为什么写这篇文章?<br>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/09/06/java返回引用和返回对象/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
