@@ -84,12 +84,33 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="小墨鱼">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？
+问题的产生事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说
+    java方法中直接new对象返回和赋值返回有什么区别啊？
+
+然而，就有一位同事说出了gc，然后就没然后了！包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java返回引用和返回对象">
+<meta property="og:url" content="http://yoursite.com/2016/09/06/java返回引用和返回对象/index.html">
 <meta property="og:site_name" content="小墨鱼">
+<meta property="og:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？
+问题的产生事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说
+    java方法中直接new对象返回和赋值返回有什么区别啊？
+
+然而，就有一位同事说出了gc，然后就没然后了！包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/usedmem.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc1.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc2.png?raw=true">
+<meta property="og:updated_time" content="2016-09-06T14:47:49.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小墨鱼">
+<meta name="twitter:title" content="java返回引用和返回对象">
+<meta name="twitter:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？
+问题的产生事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说
+    java方法中直接new对象返回和赋值返回有什么区别啊？
+
+然而，就有一位同事说出了gc，然后就没然后了！包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题">
+<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true">
 
 
 
@@ -110,9 +131,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/09/06/java返回引用和返回对象/"/>
 
-  <title> 小墨鱼 </title>
+  <title> java返回引用和返回对象 | 小墨鱼 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -142,9 +163,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -244,9 +263,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
 
   
@@ -273,10 +292,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/09/06/java返回引用和返回对象/" itemprop="url">
-                  java返回引用和返回对象
-                </a>
+                java返回引用和返回对象
               
             
           </h1>
@@ -313,6 +329,11 @@
           
 
           
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o">热度</i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
         </div>
       </header>
     
@@ -326,9 +347,7 @@
       
 
       
-        
-          
-            <h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
+        <h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
 <h3 id="问题的产生"><a href="#问题的产生" class="headerlink" title="问题的产生"></a>问题的产生</h3><p>事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说</p>
 <font color="DeepPink"><br>    java方法中直接new对象返回和赋值返回有什么区别啊？<br></font>
 
@@ -341,16 +360,20 @@
 <p>好了，到这里就已经结束了，这里我写的是return new的返回，返回引用没有差别，当然你么自己<br>也可以测试一下😁</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实也不算是总结吧，也是今天看到的，在编写程序的时候尽量使用局部变量，这样可以有效的<br>控制内存，在方法结束的时候，栈中的数据会自动释放而不用我们操心了！！！</p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
@@ -358,358 +381,51 @@
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/08/27/java-finalize方法/" rel="next" title="java finalize方法">
+                <i class="fa fa-chevron-left"></i> java finalize方法
+              </a>
             
-              
-                
-                <a class="post-title-link" href="/2016/08/27/java-finalize方法/" itemprop="url">
-                  java finalize方法
-                </a>
-              
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
             
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-27T19:30:46+08:00" content="2016-08-27">
-              2016-08-27
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/27/java-finalize方法/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/27/java-finalize方法/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
       
 
       
-        
-          <p>为什么写这篇文章?<br>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/27/java-finalize方法/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
+
+    <div class="post-spread">
       
+        <div class="ds-share flat" data-thread-key="2016/09/06/java返回引用和返回对象/"
+     data-title="java返回引用和返回对象"
+     data-content=""
+     data-url="http://yoursite.com/2016/09/06/java返回引用和返回对象/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
 
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
 
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/23/mapreduce计算uv/" itemprop="url">
-                  mapreduce计算uv
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-23T13:33:30+08:00" content="2016-08-23">
-              2016-08-23
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/23/mapreduce计算uv/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/23/mapreduce计算uv/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
-      
-
-      
-        
-          <p>为什么写这篇文件?<br>我们在统计的时候pv和uv可以说的最基础的也是最常见的，相信做数据的都知道。这种需求<br>我们一般就是使用hive进行统计就完事了，非常的简单。<br>根据url计算每个页面的访问次数和独立访客用户数。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/23/mapreduce计算uv/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/11/storm整合kafka重复消费问题分析/" itemprop="url">
-                  storm整合kafka重复消费问题分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-11T21:43:29+08:00" content="2016-08-11">
-              2016-08-11
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/11/storm整合kafka重复消费问题分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/11/storm整合kafka重复消费问题分析/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
-      
-
-      
-        
-          <p>为什么写这篇文章?<br>最近在整合storm+kafka一直纠结于重复数据的读取，重新启动topology更是把kafka的数据扫描一遍，<br>【如果线上逻辑较重，并且还要往数据库里面插入数据是不是有很多重复数据了！】</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/11/storm整合kafka重复消费问题分析/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
@@ -717,6 +433,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/09/06/java返回引用和返回对象/"
+           data-title="java返回引用和返回对象" data-url="http://yoursite.com/2016/09/06/java返回引用和返回对象/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -736,8 +460,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://i01.pictn.sogoucdn.com/f83a9e9b980ed956"
@@ -773,6 +506,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么写这篇文章"><span class="nav-number">1.</span> <span class="nav-text">为什么写这篇文章?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题的产生"><span class="nav-number">2.</span> <span class="nav-text">问题的产生</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -885,6 +629,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
