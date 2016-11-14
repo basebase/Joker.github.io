@@ -84,12 +84,18 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="小墨鱼">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="此文章不涉及与互斥锁等比比较，只是单纯的介绍一个自旋锁，如果想要了解更多可以点击参考链接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java自旋锁">
+<meta property="og:url" content="http://yoursite.com/2016/11/14/java自旋锁/index.html">
 <meta property="og:site_name" content="小墨鱼">
+<meta property="og:description" content="此文章不涉及与互斥锁等比比较，只是单纯的介绍一个自旋锁，如果想要了解更多可以点击参考链接">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%87%AA%E6%97%8B%E9%94%81/java%E8%87%AA%E6%97%8B%E9%94%81.png?raw=true">
+<meta property="og:updated_time" content="2016-11-14T07:01:41.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小墨鱼">
+<meta name="twitter:title" content="java自旋锁">
+<meta name="twitter:description" content="此文章不涉及与互斥锁等比比较，只是单纯的介绍一个自旋锁，如果想要了解更多可以点击参考链接">
+<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/java%E8%87%AA%E6%97%8B%E9%94%81/java%E8%87%AA%E6%97%8B%E9%94%81.png?raw=true">
 
 
 
@@ -110,9 +116,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/11/14/java自旋锁/"/>
 
-  <title> 小墨鱼 </title>
+  <title> java自旋锁 | 小墨鱼 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -142,9 +148,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -244,9 +248,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
 
   
@@ -273,10 +277,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/11/14/java自旋锁/" itemprop="url">
-                  java自旋锁
-                </a>
+                java自旋锁
               
             
           </h1>
@@ -313,119 +314,10 @@
           
 
           
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
-      
-
-      
-        
-          <p>此文章不涉及与互斥锁等比比较，只是单纯的介绍一个自旋锁，如果想要了解更多可以点击参考链接<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/11/14/java自旋锁/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/06/java返回引用和返回对象/" itemprop="url">
-                  java返回引用和返回对象
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-06T21:02:21+08:00" content="2016-09-06">
-              2016-09-06
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/09/06/java返回引用和返回对象/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/09/06/java返回引用和返回对象/" itemprop="commentsCount"></span>
-                </a>
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o">热度</i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
               </span>
-            
-          
-
-          
-
-          
-          
-
           
         </div>
       </header>
@@ -440,22 +332,33 @@
       
 
       
-        
-          <p>为什么写这篇文章?<br>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/09/06/java返回引用和返回对象/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+        <p>此文章不涉及与互斥锁等比比较，只是单纯的介绍一个自旋锁，如果想要了解更多可以点击参考链接<br><a id="more"></a></p>
+<h3 id="一个自旋锁例子"><a href="#一个自旋锁例子" class="headerlink" title="一个自旋锁例子"></a>一个自旋锁例子</h3><p>自旋锁的介绍原理等过程我就不在此介绍了，下面的参考已经写的非常不错了！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"><span class="comment">/***</span></div><div class="line"> * 自旋锁</div><div class="line"> * <span class="doctag">@author</span> Joker</div><div class="line"> *</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpinLock</span> </span>&#123;</div><div class="line">	</div><div class="line">	AtomicReference&lt;Thread&gt; owner = <span class="keyword">new</span> AtomicReference&lt;Thread&gt;();</div><div class="line">	<span class="keyword">private</span> <span class="keyword">int</span> count ;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</div><div class="line">		Thread currentThread = Thread.currentThread();</div><div class="line">		System.out.println(<span class="string">"lock() -&gt; "</span> + currentThread.getName());</div><div class="line">		<span class="keyword">if</span> (currentThread == owner.get()) &#123;</div><div class="line">			count++; <span class="comment">// 获取锁的次数</span></div><div class="line">			<span class="keyword">return</span> ;</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">		<span class="comment">// 当线程越来越多由于while循环会浪费cpu时间片，compareAndSet需要多次对同一内存进行访问</span></div><div class="line">		<span class="keyword">while</span> (!owner.compareAndSet(<span class="keyword">null</span>, currentThread)) &#123;</div><div class="line">			</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unLock</span><span class="params">()</span> </span>&#123;</div><div class="line">		Thread currentThread = Thread.currentThread();</div><div class="line">		System.out.println(<span class="string">"unLock() -&gt; "</span> + currentThread.getName());</div><div class="line">		<span class="keyword">if</span> (currentThread == owner.get()) &#123;</div><div class="line">			<span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</div><div class="line">				count--;</div><div class="line">			&#125; <span class="keyword">else</span> &#123;</div><div class="line">				owner.compareAndSet(currentThread, <span class="keyword">null</span>);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpinLockTest</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</div><div class="line"></div><div class="line">	<span class="keyword">static</span> <span class="keyword">int</span> sum ;</div><div class="line">	<span class="keyword">private</span> SpinLock lock;</div><div class="line">	</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="title">SpinLockTest</span><span class="params">(SpinLock lock)</span> </span>&#123;</div><div class="line">		<span class="keyword">this</span>.lock = lock;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">		<span class="keyword">this</span>.lock.lock();</div><div class="line">		<span class="keyword">this</span>.lock.lock();</div><div class="line">		System.out.println(<span class="string">"当前线程 "</span> + Thread.currentThread().getName() + <span class="string">" start..."</span>);</div><div class="line">		sum++;</div><div class="line">		System.out.println(<span class="string">"当前线程 "</span> + Thread.currentThread().getName() + <span class="string">" end..."</span>);</div><div class="line">		</div><div class="line">		<span class="keyword">this</span>.lock.unLock();</div><div class="line">		<span class="keyword">this</span>.lock.unLock();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">		SpinLock lock = <span class="keyword">new</span> SpinLock();</div><div class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; <span class="number">5</span>; i++) &#123;</div><div class="line">			SpinLockTest lockTest = <span class="keyword">new</span> SpinLockTest(lock);</div><div class="line">			Thread t = <span class="keyword">new</span> Thread(lockTest, <span class="string">"thread-lock-"</span>+i);</div><div class="line">			t.start();</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">		Thread.sleep(<span class="number">1000</span>);</div><div class="line">		System.out.println(sum);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最后附上一张我自己画的一张运行图</p>
+<p><img src="https://github.com/basebase/img_server/blob/master/java%E8%87%AA%E6%97%8B%E9%94%81/java%E8%87%AA%E6%97%8B%E9%94%81.png?raw=true" alt="java自旋锁"></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://www.cnblogs.com/cposture/p/SpinLock.html#_label0" target="_blank" rel="external">http://www.cnblogs.com/cposture/p/SpinLock.html#_label0</a></p>
+
       
     </div>
 
     <div>
       
+        
+<div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="https://github.com/basebase/img_server/blob/master/users/wchat.png?raw=true" alt="小墨鱼 wechat" style="width: 200px; max-width: 100%;"/>
+    <div>扫一扫，加我好友</div>
+</div>
+
+
+      
     </div>
 
     <div>
+      
+        
+
       
     </div>
 
@@ -464,361 +367,51 @@
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/09/06/java返回引用和返回对象/" rel="next" title="java返回引用和返回对象">
+                <i class="fa fa-chevron-left"></i> java返回引用和返回对象
+              </a>
             
-              
-                
-                <a class="post-title-link" href="/2016/08/27/java-finalize方法/" itemprop="url">
-                  java finalize方法
-                </a>
-              
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
             
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-27T19:30:46+08:00" content="2016-08-27">
-              2016-08-27
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/27/java-finalize方法/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/27/java-finalize方法/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
       
 
       
-        
-          <p>为什么写这篇文章?<br>要说finalize方法我想做java的都知道，那么finalize方法会不会执行，如果会什么时候执行？如果重写finalize方法又有什么严重的后果? </p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/27/java-finalize方法/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
+
+    <div class="post-spread">
       
+        <div class="ds-share flat" data-thread-key="2016/11/14/java自旋锁/"
+     data-title="java自旋锁"
+     data-content=""
+     data-url="http://yoursite.com/2016/11/14/java自旋锁/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
 
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
 
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/23/mapreduce计算uv/" itemprop="url">
-                  mapreduce计算uv
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-23T13:33:30+08:00" content="2016-08-23">
-              2016-08-23
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/23/mapreduce计算uv/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/23/mapreduce计算uv/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
-      
-
-      
-        
-          <p>为什么写这篇文件?<br>我们在统计的时候pv和uv可以说的最基础的也是最常见的，相信做数据的都知道。这种需求<br>我们一般就是使用hive进行统计就完事了，非常的简单。<br>根据url计算每个页面的访问次数和独立访客用户数。</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/23/mapreduce计算uv/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-
-
-
-
-
-
-
-    
-      <header class="post-header">
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/11/storm整合kafka重复消费问题分析/" itemprop="url">
-                  storm整合kafka重复消费问题分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-08-11T21:43:29+08:00" content="2016-08-11">
-              2016-08-11
-            </time>
-          </span>
-
-          
-
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/08/11/storm整合kafka重复消费问题分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/11/storm整合kafka重复消费问题分析/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-
-
-      
-      
-
-      
-        
-          <p>为什么写这篇文章?<br>最近在整合storm+kafka一直纠结于重复数据的读取，重新启动topology更是把kafka的数据扫描一遍，<br>【如果线上逻辑较重，并且还要往数据库里面插入数据是不是有很多重复数据了！】</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/08/11/storm整合kafka重复消费问题分析/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
@@ -826,6 +419,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/11/14/java自旋锁/"
+           data-title="java自旋锁" data-url="http://yoursite.com/2016/11/14/java自旋锁/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -845,8 +446,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://i01.pictn.sogoucdn.com/f83a9e9b980ed956"
@@ -882,6 +492,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一个自旋锁例子"><span class="nav-number">1.</span> <span class="nav-text">一个自旋锁例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -994,6 +615,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
