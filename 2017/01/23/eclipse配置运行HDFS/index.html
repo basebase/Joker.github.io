@@ -84,21 +84,22 @@
 
 
 
-<meta name="description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？">
+<meta name="description" content="前言通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中1start-dfs.sh">
 <meta property="og:type" content="article">
-<meta property="og:title" content="java返回引用和返回对象">
-<meta property="og:url" content="http://yoursite.com/2016/09/06/java返回引用和返回对象/index.html">
+<meta property="og:title" content="eclipse配置运行HDFS">
+<meta property="og:url" content="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/index.html">
 <meta property="og:site_name" content="小墨鱼">
-<meta property="og:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/usedmem.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc1.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc2.png?raw=true">
-<meta property="og:updated_time" content="2016-09-06T14:49:52.000Z">
+<meta property="og:description" content="前言通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中1start-dfs.sh">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/01.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/02.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/03.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/04.png?raw=true">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/05.png?raw=true">
+<meta property="og:updated_time" content="2017-01-24T09:24:16.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="java返回引用和返回对象">
-<meta name="twitter:description" content="为什么写这篇文章?在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。那么究竟是什么问题呢？">
-<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true">
+<meta name="twitter:title" content="eclipse配置运行HDFS">
+<meta name="twitter:description" content="前言通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中1start-dfs.sh">
+<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/01.png?raw=true">
 
 
 
@@ -119,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/09/06/java返回引用和返回对象/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/"/>
 
-  <title> java返回引用和返回对象 | 小墨鱼 </title>
+  <title> eclipse配置运行HDFS | 小墨鱼 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -280,7 +281,7 @@
             
             
               
-                java返回引用和返回对象
+                eclipse配置运行HDFS
               
             
           </h1>
@@ -292,8 +293,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-06T21:02:21+08:00" content="2016-09-06">
-              2016-09-06
+            <time itemprop="dateCreated" datetime="2017-01-23T15:49:48+08:00" content="2017-01-23">
+              2017-01-23
             </time>
           </span>
 
@@ -304,8 +305,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/09/06/java返回引用和返回对象/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/09/06/java返回引用和返回对象/" itemprop="commentsCount"></span>
+                <a href="/2017/01/23/eclipse配置运行HDFS/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/23/eclipse配置运行HDFS/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -335,20 +336,29 @@
       
 
       
-        <p>为什么写这篇文章?<br>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
+        <p>前言<br>通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">start-dfs.sh</div></pre></td></tr></table></figure></p>
 <a id="more"></a>
-<h3 id="为什么写这篇文章"><a href="#为什么写这篇文章" class="headerlink" title="为什么写这篇文章?"></a>为什么写这篇文章?</h3><p>在写java finalize文章的时我说过，有一个同事问了一个问题。今天这篇文章就是记录此问题。<br>那么究竟是什么问题呢？</p>
-<h3 id="问题的产生"><a href="#问题的产生" class="headerlink" title="问题的产生"></a>问题的产生</h3><p>事情发生在中午，当时我正在写code，然后讨论组里面发出一个问题说</p>
-<font color="DeepPink"><br>    java方法中直接new对象返回和赋值返回有什么区别啊？<br></font>
-
-<p>然而，就有一位同事说出了gc，然后就没然后了！<br>包括我当时也只是说到对象没有被引用就被回收（其实这里说的也还是有问题，只能说会被加入到F-Queue中，然后等待处理）。</p>
-<p>因为GC到底什么时候执行我么是不清楚的，不同的jvm有不同的算法。</p>
-<p>我本着一颗搜索的心，发现有人说java的new返回的是一个临时对象，然后我就各种搜索临时对象的资料<br>无果，全部都是C/C++的描述，由于我没有接触C/C++所以看的也有点云里雾里!</p>
-<p>后来经过大牛的指点，如下：</p>
-<font color="DeepPink"><br>    其实java没有临时的概念，不像c有栈空间上的对象。Java对象都是堆上的，通过引用操作对象<br></font><br>看到这里是不是一目了然了😝<br><br>当线程执行一个方法时，就会随之创建一个对应的栈帧，并将建立的栈帧压栈。当方法执行完毕之后，便会将栈帧出栈。我们知道局部变量都是放在栈中的。<br><br>来，看看下图<br><br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/11111.png?raw=true" alt="jvm stack"><br><br>那么当方法返回结束了，这个对象是不是没有被引用了，也就加入到F-Queue中等待处理了。<br>而在return直接new返回也是一样的。<br><br>说到这里，我么基本上可以认为二者没有区别，如果有也是微乎其微的了。<br><br>### 实践<br><br><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Date <span class="title">getDate</span><span class="params">()</span> </span>&#123;</div><div class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Date();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">		System.out.println(<span class="string">"1"</span>);</div><div class="line">		Date date = getDate();</div><div class="line">		<span class="comment">//System.gc();</span></div><div class="line">		Thread.sleep(<span class="number">10000</span>);</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure><br><br>下图是没有进行gc时候运行情况。<br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/usedmem.png?raw=true" alt="jvm stack"><br><br>上图程序我运行了好几次，但是大部分使用情况都如上，你么在运行的时候可以多测试看看。<br><br>然后把System.gc()的注释解开，在来观察一下。<br><br>运行情况良好的一次，如下图：<br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc1.png?raw=true" alt="jvm gc"><br><br>可以看到内存使用情况，gc确实执行了。<br><br>然而，我们在看看运行N次后的情况，为了下图我也是消耗了一些时间！！！<br><img src="https://github.com/basebase/img_server/blob/master/java%E8%BF%94%E5%9B%9E%E5%BC%95%E7%94%A8%E5%92%8C%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1/gc2.png?raw=true" alt="jvm gc2"><br><br>我们可以看到内存使用情况，是不是还很高，这就说明了<br><font color="DeepPink"><br>    调用java的System.gc()不一定会执行GC操作<br></font>
-
-<p>好了，到这里就已经结束了，这里我写的是return new的返回，返回引用没有差别，当然你么自己<br>也可以测试一下😁</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实也不算是总结吧，也是今天看到的，在编写程序的时候尽量使用局部变量，这样可以有效的<br>控制内存，在方法结束的时候，栈中的数据会自动释放而不用我们操心了！！！</p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">start-dfs.sh</div></pre></td></tr></table></figure></p>
+<p>用来启动hdfs的，如果想要看看NameNode的启动是不是需要配置远程调试了。（我以前弄过，但是之前没有写过博客）。</p>
+<p>如果可以在本地就可以调试这些内容是不是更能了解内部是如何处理的。</p>
+<h3 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h3><p>需要准备什么东东呢？<br>hadoop源码（我用的是2.7.0，你们随意）<br>IDEA或者eclipse等等用来导入源码，方便阅读。</p>
+<p>假设以上内容已经齐全，现在开始进入主题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mvn install -DskipTests</div><div class="line">mvn eclipse:eclipse -DdownloadSources=<span class="literal">true</span> -DdownloadJavadocs=<span class="literal">true</span></div></pre></td></tr></table></figure>
+<p>导入之后，找到hdfs项目的NameNode和DataNode运行即可。<br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/01.png?raw=true" alt="项目图"><br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/02.png?raw=true" alt="NN"><br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/03.png?raw=true" alt="DT"></p>
+<p>你以为这就结束了？？？</p>
+<p>接下来，我来说说在部署和启动遇到的问题吧。</p>
+<p>1、webapps/hdfs not found in CLASSPATH<br>出现这个异常是在启动NameNode的时候出现的，下面是具体抛出异常的代码(hadoop-common项目http包下的HttpServer2)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> String <span class="title">getWebAppsPath</span><span class="params">(String appName)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</div><div class="line">   URL url = getClass().getClassLoader().getResource(<span class="string">"webapps/"</span> + appName);</div><div class="line">   <span class="keyword">if</span> (url == <span class="keyword">null</span>)</div><div class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"webapps/"</span> + appName</div><div class="line">         + <span class="string">" not found in CLASSPATH"</span>);</div><div class="line">   String urlString = url.toString();</div><div class="line">   <span class="keyword">return</span> urlString.substring(<span class="number">0</span>, urlString.lastIndexOf(<span class="string">'/'</span>));</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<p>当我debug的时候，他一直找我的hadoop-common的jar的webapp中的hdfs目录，所以导致我一直出现<br>找不到的异常，后来我重写一个该类指定hdfs项目的路径解决可以运行（如果还有其他的解决方案请在评论下方说明一下，万分感谢!）, 还有个datanode目录没有找到的异常是在运行DataNode出现的<br>具体出现的位置我给忘记了，😝😝😝😝</p>
+<p>2、Exception in thread “main” java.lang.IllegalArgumentException: Invalid URI for NameNode address (check fs.defaultFS): file:/// has no authority.</p>
+<p>出现此异常首先去stackoverflow找了下答案，如下：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line"> <span class="tag">&lt;<span class="name">property</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.defaultFS<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://10.100.20.168/<span class="tag">&lt;/<span class="name">value</span>&gt;</span></div><div class="line"> <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>但是对我是无效的，后来知道原因我使用的是core-default.xml的配置没有生效。<br>但是一开始我就是defualt的配置也能正常运行。。。（奇怪的问题）</p>
+<p>如下代码是抛出异常的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> InetSocketAddress <span class="title">getAddress</span><span class="params">(URI filesystemURI)</span> </span>&#123;</div><div class="line">    String authority = filesystemURI.getAuthority();</div><div class="line">    <span class="keyword">if</span> (authority == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(String.format(</div><div class="line">          <span class="string">"Invalid URI for NameNode address (check %s): %s has no authority."</span>,</div><div class="line">          FileSystem.FS_DEFAULT_NAME_KEY, filesystemURI.toString()));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (!HdfsConstants.HDFS_URI_SCHEME.equalsIgnoreCase(</div><div class="line">        filesystemURI.getScheme())) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(String.format(</div><div class="line">          <span class="string">"Invalid URI for NameNode address (check %s): %s is not of scheme '%s'."</span>,</div><div class="line">          FileSystem.FS_DEFAULT_NAME_KEY, filesystemURI.toString(),</div><div class="line">          HdfsConstants.HDFS_URI_SCHEME));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> getAddress(authority);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>至于为什么会这样，在FileSystem类中有这么一段<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String FS_DEFAULT_NAME_KEY = </div><div class="line">                   CommonConfigurationKeys.FS_DEFAULT_NAME_KEY;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_FS = </div><div class="line">                   CommonConfigurationKeys.FS_DEFAULT_NAME_DEFAULT;</div><div class="line"></div><div class="line"><span class="comment">/*</span></div><div class="line">    // CommonConfigura.java</div><div class="line">    public static final String  FS_DEFAULT_NAME_KEY = "fs.defaultFS";</div><div class="line">    public static final String  FS_DEFAULT_NAME_DEFAULT = "file:///";</div><div class="line"></div><div class="line">*/</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> URI <span class="title">getDefaultUri</span><span class="params">(Configuration conf)</span> </span>&#123;</div><div class="line">    <span class="comment">// 这里就是创建URI对象, 各位可以单独写个Test来看看创建的对象数据。</span></div><div class="line">    <span class="comment">// URI uri = new URI("file:///");</span></div><div class="line">    <span class="keyword">return</span> URI.create(fixName(conf.get(FS_DEFAULT_NAME_KEY, DEFAULT_FS)));</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<p>至此，我这里就把我遇到的问题全部说完了。</p>
+<p>最后，在给大家演示一下，我运行hadoop fs -put localPath hdfsPath是如何断点的。<br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/04.png?raw=true" alt="put"><br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/05.png?raw=true" alt="put-d"></p>
+<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p><a href="https://wiki.apache.org/hadoop/EclipseEnvironment" target="_blank" rel="external">https://wiki.apache.org/hadoop/EclipseEnvironment</a></p>
 
       
     </div>
@@ -391,17 +401,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/08/27/java-finalize方法/" rel="next" title="java finalize方法">
-                <i class="fa fa-chevron-left"></i> java finalize方法
+              <a href="/2016/11/14/java自旋锁/" rel="next" title="java自旋锁">
+                <i class="fa fa-chevron-left"></i> java自旋锁
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/11/14/java自旋锁/" rel="prev" title="java自旋锁">
-                java自旋锁 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -416,10 +422,10 @@
 
     <div class="post-spread">
       
-        <div class="ds-share flat" data-thread-key="2016/09/06/java返回引用和返回对象/"
-     data-title="java返回引用和返回对象"
+        <div class="ds-share flat" data-thread-key="2017/01/23/eclipse配置运行HDFS/"
+     data-title="eclipse配置运行HDFS"
      data-content=""
-     data-url="http://yoursite.com/2016/09/06/java返回引用和返回对象/">
+     data-url="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/">
   <div class="ds-share-inline">
     <ul  class="ds-share-icons-16">
 
@@ -446,8 +452,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/09/06/java返回引用和返回对象/"
-           data-title="java返回引用和返回对象" data-url="http://yoursite.com/2016/09/06/java返回引用和返回对象/">
+      <div class="ds-thread" data-thread-key="2017/01/23/eclipse配置运行HDFS/"
+           data-title="eclipse配置运行HDFS" data-url="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/">
       </div>
     
   </div>
@@ -524,7 +530,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么写这篇文章"><span class="nav-number">1.</span> <span class="nav-text">为什么写这篇文章?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题的产生"><span class="nav-number">2.</span> <span class="nav-text">问题的产生</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实战"><span class="nav-number">2.</span> <span class="nav-text">实战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链接"><span class="nav-number">3.</span> <span class="nav-text">链接</span></a></li></ol></div>
             
           </div>
         </section>
