@@ -1,0 +1,839 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/images/create_thumb.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。
+12345678SELECT     tab1.*,     tab2.* FROM     table1 tab1JOIN    table2 tb2     on tab1.id = tab2.id
+两张表关联在一起">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mapreduce join">
+<meta property="og:url" content="http://yoursite.com/2017/02/03/mapreduce-join/index.html">
+<meta property="og:site_name" content="小墨鱼">
+<meta property="og:description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。
+12345678SELECT     tab1.*,     tab2.* FROM     table1 tab1JOIN    table2 tb2     on tab1.id = tab2.id
+两张表关联在一起">
+<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/mapreduce-join/join-01.png?raw=true">
+<meta property="og:updated_time" content="2017-02-03T09:05:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mapreduce join">
+<meta name="twitter:description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。
+12345678SELECT     tab1.*,     tab2.* FROM     table1 tab1JOIN    table2 tb2     on tab1.id = tab2.id
+两张表关联在一起">
+<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/mapreduce-join/join-01.png?raw=true">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/02/03/mapreduce-join/"/>
+
+  <title> mapreduce join | 小墨鱼 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', '83363914', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">小墨鱼</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">受尽苦难而不厌，此乃阿修罗之道</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Suche
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+
+
+
+
+
+
+
+    
+      <header class="post-header">
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                mapreduce join
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-02-03T11:37:04+08:00" content="2017-02-03">
+              2017-02-03
+            </time>
+          </span>
+
+          
+
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/02/03/mapreduce-join/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/03/mapreduce-join/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o">热度</i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？<br>在说明mapreduce进行join开始，我们来先看看sql的语法。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> </div><div class="line">    tab1.*, </div><div class="line">    tab2.* </div><div class="line"><span class="keyword">FROM</span> </div><div class="line">    table1 tab1</div><div class="line"><span class="keyword">JOIN</span></div><div class="line">    table2 tb2 </div><div class="line">    <span class="keyword">on</span> tab1.id = tab2.id</div></pre></td></tr></table></figure>
+<p>两张表关联在一起，需要什么数据，就从不同的表中取出数据即可。</p>
+<h3 id="mapreduce如何JOIN"><a href="#mapreduce如何JOIN" class="headerlink" title="mapreduce如何JOIN"></a>mapreduce如何JOIN</h3><p>通过前面的铺垫，我们知道sql进行表关联是多么的简单。那么通过程序如何进行关联呢？<br>我们hive的数据是不是从HDFS上来的，HDFS上是不是文件数据。那么我们可以把表数据看成是一个文件。<br>那么两张表可不可以看成两个文件，hive也是拿到这两个文件进行关联的。</p>
+<p>现在如果不使用MR进行计算，写一个程序来进行连接呢？<br>文件A假设1GB，文件B500MB。<br>此时，我么可以把文件B读入到内存之中。<br>文件B的数据结构：<br>    <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Map&lt;String, List&lt;String&gt;&gt;</div></pre></td></tr></table></figure></p>
+<p>然后一行一行读取文件A的数据，判断key是否存在，如果存在，则把文件A的值+List的值遍历输出<br>是不是也可以得到呢。</p>
+<p>上面的数据可以放置在内存中，我觉得挺合理的，应为单机能处理的数据表示数据量普遍不算很大。<br>但是，如果说你现在的数据有1T呢？还有可能放置在内存中吗？</p>
+<p>我看过大部分博客内容，大部分都是相同的写法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyReducer</span> <span class="keyword">extends</span> <span class="title">Reducer</span>&lt;<span class="title">Text</span>, <span class="title">Text</span>, <span class="title">Text</span>, <span class="title">Text</span>&gt; </span>&#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;Text&gt; values,</span></span></div><div class="line">                Reducer&lt;Text, Text, Text, Text&gt;.Context context)</div><div class="line">                <span class="keyword">throws</span> IOException, InterruptedException &#123;</div><div class="line"></div><div class="line">            LinkedList&lt;String&gt; linkU = <span class="keyword">new</span> LinkedList&lt;String&gt;();  <span class="comment">//users值</span></div><div class="line">            LinkedList&lt;String&gt; linkL = <span class="keyword">new</span> LinkedList&lt;String&gt;();  <span class="comment">//login_logs值</span></div><div class="line">              </div><div class="line">            <span class="keyword">for</span> (Text tval : values) &#123;</div><div class="line">                String val = tval.toString();  </div><div class="line">                <span class="keyword">if</span>(val.startsWith(<span class="string">"u#"</span>)) &#123;</div><div class="line">                    linkU.add(val.substring(<span class="number">2</span>));</div><div class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span>(val.startsWith(<span class="string">"l#"</span>)) &#123;</div><div class="line">                    linkL.add(val.substring(<span class="number">2</span>));</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">              </div><div class="line">            <span class="keyword">for</span> (String u : linkU) &#123;</div><div class="line">                <span class="keyword">for</span> (String l : linkL) &#123;</div><div class="line">                    context.write(key, <span class="keyword">new</span> Text(u + DELIMITER + l));</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>这种写法对吗，是对的。但是有没有更好的，有。（稍后让你看，😏😏😏😏）<br>但是，我么通常也会遇到数据倾斜的问题，可能是某一组值特别的大，那么如果在JOIN的时候<br>也遇到了特别多相同的key值，那么内存还放得下吗？<br>不过这位使用LinkedList也是非常不错的，插入删除速度也是优于ArrayList（点个赞）。</p>
+<p>好了，说了这么多。你真的能比这些人的内容写的好的吗？不会再吹牛吧（尴尬表情）</p>
+<p>来说说我如何去做。<br>自定义key值之后，由于我不是放入内存的，所以字段输出的顺序可能是有点问题的<br>所以还要进行二次排序，到reduce的时候一组数据已经在一起了，我么设置一个boolean值<br>在第一次遍历值的时候不写入文件中，而是记录在一个字符串，然后第二次boolean更改后<br>把上一次和这一次的值一起写入。</p>
+<p>来看看代码吧：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Pair</span> <span class="keyword">implements</span> <span class="title">WritableComparable</span>&lt;<span class="title">Pair</span>&gt; </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Text first;</div><div class="line">    <span class="keyword">private</span> Text second;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Pair</span><span class="params">(String first, String second)</span> </span>&#123;</div><div class="line">        set(<span class="keyword">new</span> Text(first), <span class="keyword">new</span> Text(second));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Pair</span><span class="params">()</span> </span>&#123;</div><div class="line">        set(<span class="keyword">new</span> Text(), <span class="keyword">new</span> Text());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Pair</span><span class="params">(Text first, String second)</span> </span>&#123;</div><div class="line">        set(first, <span class="keyword">new</span> Text(second));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Pair</span><span class="params">(String first, Text second)</span> </span>&#123;</div><div class="line">        set(<span class="keyword">new</span> Text(first), second);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(Text first, Text second)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.first = first;</div><div class="line">        <span class="keyword">this</span>.second = second;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Text <span class="title">getFirst</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> first;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Text <span class="title">getSecond</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> second;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(DataOutput out)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        first.write(out);</div><div class="line">        second.write(out);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readFields</span><span class="params">(DataInput in)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        first.readFields(in);</div><div class="line">        second.readFields(in);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> first.hashCode() * <span class="number">163</span> + second.hashCode();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object obj)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (obj <span class="keyword">instanceof</span> Pair) &#123;</div><div class="line">            Pair pair = (Pair) obj;</div><div class="line">            <span class="keyword">return</span> first.equals(pair.first) &amp;&amp; second.equals(pair.second);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.first.toString();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Pair pair)</span> </span>&#123;</div><div class="line">        <span class="comment">// int cmp = first.compareTo(pair.first);</span></div><div class="line">        <span class="keyword">int</span> cmp = pair.first.compareTo(first);</div><div class="line">        <span class="keyword">if</span> (cmp != <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> cmp;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">// return second.compareTo(pair.second);</span></div><div class="line">        <span class="keyword">return</span> pair.second.compareTo(second);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Pair pair, <span class="keyword">int</span> index)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (index == <span class="number">1</span>) &#123;</div><div class="line"><span class="comment">//            return this.first.compareTo(pair.first);</span></div><div class="line">            <span class="keyword">return</span> pair.first.compareTo(<span class="keyword">this</span>.first);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line"><span class="comment">//            return this.second.compareTo(pair.second);</span></div><div class="line">            <span class="keyword">return</span> pair.second.compareTo(<span class="keyword">this</span>.second);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LJoinMapper</span> <span class="keyword">extends</span> <span class="title">Mapper</span>&lt;<span class="title">Object</span>, <span class="title">Text</span>, <span class="title">Pair</span>, <span class="title">Text</span>&gt; </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Text key = <span class="keyword">new</span> Text();</div><div class="line">    <span class="keyword">private</span> Text val = <span class="keyword">new</span> Text();</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(Object line, Text value, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</div><div class="line">        String[] tokens = value.toString().split(<span class="string">","</span>);</div><div class="line">        <span class="keyword">if</span> (tokens.length &lt; <span class="number">3</span>) &#123;</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// key</span></div><div class="line">        String k = tokens[<span class="number">0</span>] + <span class="string">","</span> + tokens[<span class="number">1</span>];</div><div class="line">        </div><div class="line">        Pair pair = <span class="keyword">new</span> Pair(k, <span class="string">"0"</span>);</div><div class="line"></div><div class="line">        <span class="comment">// val</span></div><div class="line"><span class="comment">//        String v = "left" + "," + tokens[2];</span></div><div class="line">         String v = tokens[<span class="number">2</span>];</div><div class="line"><span class="comment">//        key.set(k);</span></div><div class="line">        val.set(v);</div><div class="line"><span class="comment">//        context.write(key, val);</span></div><div class="line">        context.write(pair, val);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RJoinMapper</span> <span class="keyword">extends</span> <span class="title">Mapper</span>&lt;<span class="title">Object</span>, <span class="title">Text</span>, <span class="title">Pair</span>, <span class="title">Text</span>&gt; </span>&#123;</div><div class="line"></div><div class="line"><span class="comment">//    private Text key = new Text();</span></div><div class="line">    <span class="keyword">private</span> Text val = <span class="keyword">new</span> Text();</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(Object line, Text value, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</div><div class="line">        String[] tokens = value.toString().split(<span class="string">","</span>);</div><div class="line">        <span class="keyword">if</span> (tokens.length &lt; <span class="number">5</span>) &#123;</div><div class="line">            <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// key</span></div><div class="line">        String k = tokens[<span class="number">0</span>] + <span class="string">","</span> + tokens[<span class="number">1</span>];</div><div class="line">        </div><div class="line">        Pair pair = <span class="keyword">new</span> Pair(k, <span class="string">"1"</span>);</div><div class="line">        </div><div class="line">        <span class="comment">// val</span></div><div class="line"><span class="comment">//        String v = "right" + "," + tokens[2] + "," + tokens[3] + "," + tokens[4];</span></div><div class="line">      String v = tokens[<span class="number">2</span>] + <span class="string">","</span> + tokens[<span class="number">3</span>] + <span class="string">","</span> + tokens[<span class="number">4</span>];</div><div class="line"><span class="comment">//        key.set(k);</span></div><div class="line">        val.set(v);</div><div class="line"><span class="comment">//        context.write(key, val);</span></div><div class="line">        context.write(pair, val);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JoinReducer</span> <span class="keyword">extends</span> <span class="title">Reducer</span>&lt;<span class="title">Pair</span>, <span class="title">Text</span>, <span class="title">NullWritable</span>, <span class="title">Text</span>&gt; </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Text val = <span class="keyword">new</span> Text();</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Pair key, Iterable&lt;Text&gt; values, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</div><div class="line"></div><div class="line">        String deptName = <span class="keyword">null</span>;</div><div class="line">        <span class="keyword">boolean</span> set = <span class="keyword">false</span>;</div><div class="line">        </div><div class="line">        <span class="keyword">for</span> (Text v : values) &#123;</div><div class="line">            </div><div class="line">            String[] vs = v.toString().split(<span class="string">","</span>);</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (!set) &#123;</div><div class="line">                deptName = v.toString();</div><div class="line">                set = <span class="keyword">true</span>;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                System.out.println(key.toString() + <span class="string">","</span> + deptName + <span class="string">","</span> + v);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JOINGroup</span> <span class="keyword">extends</span> <span class="title">WritableComparator</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">JOINGroup</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(Pair.class, <span class="keyword">true</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(WritableComparable a, WritableComparable b)</span> </span>&#123;</div><div class="line">        Pair keyA = (Pair) a;</div><div class="line">        Pair keyB = (Pair) b;</div><div class="line"><span class="comment">//        return keyA.compareTo(keyB, 1);</span></div><div class="line">        <span class="keyword">return</span> keyB.compareTo(keyA, <span class="number">1</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JOINPartition</span> <span class="keyword">extends</span> <span class="title">Partitioner</span>&lt;<span class="title">Pair</span>, <span class="title">Text</span>&gt; </span>&#123;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPartition</span><span class="params">(Pair key, Text value, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> (key.getFirst().hashCode() % numPartitions);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JOINSort</span> <span class="keyword">extends</span> <span class="title">WritableComparator</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">JOINSort</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(Pair.class, <span class="keyword">true</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(WritableComparable a, WritableComparable b)</span> </span>&#123;</div><div class="line">        Pair compositeKey1 = (Pair) a;</div><div class="line">        Pair compositeKey2 = (Pair) b;</div><div class="line">        <span class="keyword">return</span> compositeKey2.compareTo(compositeKey1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Dirver</span> <span class="keyword">extends</span> <span class="title">Configured</span> <span class="keyword">implements</span> <span class="title">Tool</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">run</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (args.length != <span class="number">3</span>) &#123;</div><div class="line">            System.out.printf(<span class="string">"Usage: %s [generic options] &lt;input dir&gt; &lt;output dir&gt;\n"</span>, getClass().getSimpleName());</div><div class="line">            ToolRunner.printGenericCommandUsage(System.out);</div><div class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Configuration conf = <span class="keyword">new</span> Configuration();</div><div class="line">        Job job = Job.getInstance(conf, <span class="string">"join"</span>);</div><div class="line">        job.setJarByClass(getClass());</div><div class="line"></div><div class="line">        MultipleInputs.addInputPath(job, <span class="keyword">new</span> Path(args[<span class="number">0</span>]), TextInputFormat.class, LJoinMapper.class);</div><div class="line">        MultipleInputs.addInputPath(job, <span class="keyword">new</span> Path(args[<span class="number">1</span>]), TextInputFormat.class, RJoinMapper.class);</div><div class="line">        FileOutputFormat.setOutputPath(job, <span class="keyword">new</span> Path(args[<span class="number">2</span>]));</div><div class="line"></div><div class="line">        job.setReducerClass(JoinReducer.class);</div><div class="line">        </div><div class="line">        job.setGroupingComparatorClass(JOINGroup.class);</div><div class="line">        job.setPartitionerClass(JOINPartition.class);</div><div class="line">        job.setSortComparatorClass(JOINSort.class);</div><div class="line">        </div><div class="line">        job.setMapOutputKeyClass(Pair.class);</div><div class="line">        job.setMapOutputValueClass(Text.class);</div><div class="line"></div><div class="line">        job.setOutputKeyClass(NullWritable.class);</div><div class="line">        job.setOutputValueClass(Text.class);</div><div class="line"></div><div class="line">        <span class="keyword">return</span> job.waitForCompletion(<span class="keyword">true</span>) ? <span class="number">0</span> : <span class="number">1</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            args = <span class="keyword">new</span> String[] &#123;<span class="string">"in/l"</span>, <span class="string">"in/r"</span>, <span class="string">"ljoinout"</span>&#125;;</div><div class="line">            ToolRunner.run(<span class="keyword">new</span> Configuration(), <span class="keyword">new</span> Dirver(), args);</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>测试数据:</p>
+<p>l.txt<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1,job,beijing</div><div class="line">2,jue,shanghai</div><div class="line">3,role,shenzhen</div><div class="line">4,jie,guangzhou</div></pre></td></tr></table></figure></p>
+<p>r.txt<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">1,job,30,man,333330000</div><div class="line">2,jue,90,woman,9384832</div><div class="line">3,role,100,man,9103841038</div><div class="line">4,jie,0,man,103848103474</div><div class="line">1,job,20,man,333330000</div><div class="line">1,job,10,man,333330000</div></pre></td></tr></table></figure></p>
+<p>以下是输出结果：<br><img src="https://github.com/basebase/img_server/blob/master/mapreduce-join/join-01.png?raw=true" alt="join"></p>
+<font color="DeepPink" size="2"><br>以上程序作为内联展示给了大家，如果对文章内容有疑问，或者有更好的建议，又或者有土豪打赏<br>都不要吝啬。谢谢！<br></font>
+
+
+<h3 id="还不错的文章链接"><a href="#还不错的文章链接" class="headerlink" title="还不错的文章链接"></a>还不错的文章链接</h3><p><a href="http://codingjunkie.net/mapreduce-reduce-joins/" target="_blank" rel="external">http://codingjunkie.net/mapreduce-reduce-joins/</a><br><a href="https://www.safaribooksonline.com/library/view/data-algorithms/9781491906170/ch01.html" target="_blank" rel="external">https://www.safaribooksonline.com/library/view/data-algorithms/9781491906170/ch01.html</a><br><a href="https://chamibuddhika.wordpress.com/2012/02/26/joins-with-map-reduce/" target="_blank" rel="external">https://chamibuddhika.wordpress.com/2012/02/26/joins-with-map-reduce/</a></p>
+<p>方便后人，方便自己！！！</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>人生苦短，我要打赏!</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="https://github.com/basebase/img_server/blob/master/play/play.png?raw=true" alt="小墨鱼 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/23/eclipse配置运行HDFS/" rel="next" title="eclipse配置运行HDFS">
+                <i class="fa fa-chevron-left"></i> eclipse配置运行HDFS
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2017/02/03/mapreduce-join/"
+     data-title="mapreduce join"
+     data-content=""
+     data-url="http://yoursite.com/2017/02/03/mapreduce-join/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/02/03/mapreduce-join/"
+           data-title="mapreduce join" data-url="http://yoursite.com/2017/02/03/mapreduce-join/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://i01.pictn.sogoucdn.com/f83a9e9b980ed956"
+               alt="小墨鱼" />
+          <p class="site-author-name" itemprop="name">小墨鱼</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mapreduce如何JOIN"><span class="nav-number">2.</span> <span class="nav-text">mapreduce如何JOIN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#还不错的文章链接"><span class="nav-number">3.</span> <span class="nav-text">还不错的文章链接</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小墨鱼</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user">本站访客数</i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人</span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye">本站总访问量</i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"xmygo"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
