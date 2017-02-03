@@ -84,23 +84,17 @@
 
 
 
-<meta name="description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。
-12345678SELECT     tab1.*,     tab2.* FROM     table1 tab1JOIN    table2 tb2     on tab1.id = tab2.id
-两张表关联在一起">
+<meta name="description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mapreduce join">
 <meta property="og:url" content="http://yoursite.com/2017/02/03/mapreduce-join/index.html">
 <meta property="og:site_name" content="小墨鱼">
-<meta property="og:description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。
-12345678SELECT     tab1.*,     tab2.* FROM     table1 tab1JOIN    table2 tb2     on tab1.id = tab2.id
-两张表关联在一起">
+<meta property="og:description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。">
 <meta property="og:image" content="https://github.com/basebase/img_server/blob/master/mapreduce-join/join-01.png?raw=true">
-<meta property="og:updated_time" content="2017-02-03T09:05:13.000Z">
+<meta property="og:updated_time" content="2017-02-03T09:07:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mapreduce join">
-<meta name="twitter:description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。
-12345678SELECT     tab1.*,     tab2.* FROM     table1 tab1JOIN    table2 tb2     on tab1.id = tab2.id
-两张表关联在一起">
+<meta name="twitter:description" content="前言我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？在说明mapreduce进行join开始，我们来先看看sql的语法。">
 <meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/mapreduce-join/join-01.png?raw=true">
 
 
@@ -338,7 +332,9 @@
       
 
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？<br>在说明mapreduce进行join开始，我们来先看看sql的语法。</p>
+        <p>前言<br>我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？<br>在说明mapreduce进行join开始，我们来先看看sql的语法。</p>
+<a id="more"></a>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们知道hive，mysql等sql语言都可以进行join操作。那么mapreduce是如何join的呢？<br>在说明mapreduce进行join开始，我们来先看看sql的语法。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> </div><div class="line">    tab1.*, </div><div class="line">    tab2.* </div><div class="line"><span class="keyword">FROM</span> </div><div class="line">    table1 tab1</div><div class="line"><span class="keyword">JOIN</span></div><div class="line">    table2 tb2 </div><div class="line">    <span class="keyword">on</span> tab1.id = tab2.id</div></pre></td></tr></table></figure>
 <p>两张表关联在一起，需要什么数据，就从不同的表中取出数据即可。</p>
 <h3 id="mapreduce如何JOIN"><a href="#mapreduce如何JOIN" class="headerlink" title="mapreduce如何JOIN"></a>mapreduce如何JOIN</h3><p>通过前面的铺垫，我们知道sql进行表关联是多么的简单。那么通过程序如何进行关联呢？<br>我们hive的数据是不是从HDFS上来的，HDFS上是不是文件数据。那么我们可以把表数据看成是一个文件。<br>那么两张表可不可以看成两个文件，hive也是拿到这两个文件进行关联的。</p>
