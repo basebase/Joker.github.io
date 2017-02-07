@@ -214,7 +214,7 @@
             
               <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
             
-            Search
+            Suche
           </a>
         </li>
       
@@ -245,6 +245,133 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+
+
+
+
+
+
+
+    
+      <header class="post-header">
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/02/07/hadoop-Partitioner使用及注意点/" itemprop="url">
+                  hadoop Partitioner使用及注意点
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-02-07T15:18:46+08:00" content="2017-02-07">
+              2017-02-07
+            </time>
+          </span>
+
+          
+
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2017/02/07/hadoop-Partitioner使用及注意点/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/07/hadoop-Partitioner使用及注意点/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+
+
+      
+      
+
+      
+        
+          
+            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?<br>其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。<br>可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~</p>
+<p>我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？<br>当然是可以的是。</p>
+<p>你只需要创建一个类继承org.apache.hadoop.mapreduce.Partitioner<br>类就可以完全定义自己想要的分区方式。<br>然后在job中设置自定义的Partitioner类即可。<br>但是，这样写真的就结束了吗？</p>
+<h3 id="一个例子"><a href="#一个例子" class="headerlink" title="一个例子"></a>一个例子</h3><p>PartitionMapper.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(Object key, Text value, Context context)</span></span></div><div class="line">            <span class="keyword">throws</span> IOException, InterruptedException &#123;</div><div class="line">        String[] tokens = value.toString().split(<span class="string">","</span>);</div><div class="line">        String gender = tokens[<span class="number">2</span>];</div><div class="line">        String nameAgeScore = tokens[<span class="number">0</span>] + <span class="string">","</span> + tokens[<span class="number">1</span>] + <span class="string">","</span> + tokens[<span class="number">3</span>];</div><div class="line">        context.write(<span class="keyword">new</span> Text(gender), <span class="keyword">new</span> Text(nameAgeScore));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>AgePartitioner.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPartition</span><span class="params">(Text key, Text value, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</div><div class="line">        </div><div class="line">        String[] nameAgeScore = value.toString().split(<span class="string">","</span>);</div><div class="line">        String age = nameAgeScore[<span class="number">1</span>];</div><div class="line">        <span class="keyword">int</span> ageInt = Integer.parseInt(age);</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (numPartitions == <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (ageInt &lt;= <span class="number">20</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (ageInt &gt; <span class="number">20</span> &amp;&amp; ageInt &lt;= <span class="number">50</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="number">1</span> % numPartitions;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">return</span> <span class="number">2</span> % numPartitions;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>ParitionReducer.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;Text&gt; values, Context context)</span></span></div><div class="line">            <span class="keyword">throws</span> IOException, InterruptedException &#123;</div><div class="line">        </div><div class="line">        <span class="keyword">int</span> maxScore = Integer.MIN_VALUE;</div><div class="line">        String name = <span class="string">""</span>;</div><div class="line">        String age = <span class="string">""</span>;</div><div class="line">        String gender = <span class="string">""</span>;</div><div class="line">        </div><div class="line">        <span class="keyword">int</span> score = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span> (Text val : values) &#123;</div><div class="line">            String[] valTokens = val.toString().split(<span class="string">","</span>);</div><div class="line">            score = Integer.parseInt(valTokens[<span class="number">2</span>]);</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (score &gt; maxScore) &#123;</div><div class="line">                name = valTokens[<span class="number">0</span>];</div><div class="line">                age = valTokens[<span class="number">1</span>];</div><div class="line">                gender = key.toString();</div><div class="line">                maxScore = score;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        context.write(<span class="keyword">new</span> Text(name), <span class="keyword">new</span> Text(<span class="string">"age- "</span> + age + <span class="string">","</span> + gender + <span class="string">","</span> + <span class="string">" score-"</span> + maxScore));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>驱动类，具体的模板代码我就不再写入，只将Partitioner设置展示<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">job.setPartitionerClass(AgePartitioner.class);</div></pre></td></tr></table></figure></p>
+<p>以上这个例子，是我在其它文章中截取下来的，具体地址，会在链接中给出。<br>现在，你可以运行该例子，你会发现Reduce输出的只有一个文件，然后你还会发现其实使用的并非是自定义<br>的Partitioner类。</p>
+<p>一开始的时候，我有点懵逼了。what？我的设置没有生效吗？<br>你的设置是没有问题的，但是你却忘记了一项重要的事情。究竟是什么事情呀，快点说说呀（臭鱼）。<br>在说出这个秘密之前，我们看看map的context.write()这个方法是怎么做的吧。</p>
+<p>MapTask.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(K key, V value)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</div><div class="line">      collector.collect(key, value,</div><div class="line">                        partitioner.getPartition(key, value, partitions));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>其中partitioner是在哪里定义的呢？<br>在NewOutputCollector类中，该类作为MapTask内部类。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">NewOutputCollector</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt;</span></div><div class="line">    <span class="keyword">extends</span> <span class="title">org</span>.<span class="title">apache</span>.<span class="title">hadoop</span>.<span class="title">mapreduce</span>.<span class="title">RecordWriter</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; &#123;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> MapOutputCollector&lt;K,V&gt; collector;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> org.apache.hadoop.mapreduce.Partitioner&lt;K,V&gt; partitioner;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> partitions;</div><div class="line"></div><div class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">    NewOutputCollector(org.apache.hadoop.mapreduce.JobContext jobContext,</div><div class="line">                       JobConf job,</div><div class="line">                       TaskUmbilicalProtocol umbilical,</div><div class="line">                       TaskReporter reporter</div><div class="line">                       ) <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</div><div class="line">      collector = createSortingCollector(job, reporter);</div><div class="line">      partitions = jobContext.getNumReduceTasks();</div><div class="line">      <span class="keyword">if</span> (partitions &gt; <span class="number">1</span>) &#123;</div><div class="line">        partitioner = (org.apache.hadoop.mapreduce.Partitioner&lt;K,V&gt;)</div><div class="line">          ReflectionUtils.newInstance(jobContext.getPartitionerClass(), job);</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        partitioner = <span class="keyword">new</span> org.apache.hadoop.mapreduce.Partitioner&lt;K,V&gt;() &#123;</div><div class="line">          <span class="meta">@Override</span></div><div class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPartition</span><span class="params">(K key, V value, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> partitions - <span class="number">1</span>;</div><div class="line">          &#125;</div><div class="line">        &#125;;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...</div></pre></td></tr></table></figure></p>
+<p>我们来看看构造函数之中，如果partitions大于1就从配置中读取我们自己的Partitioner对象并实例化给引用，否则自己就创建一个实例。<br>那partitions是从jobContext.getNumReduceTasks();读取出来的，这个要怎么配置呢？</p>
+<font color="DeepPink" size="3"><br>job.setNumReduceTasks(number);<br></font>
+
+<p>配置该值之后，那么就可以使用我们自己定义的分区函数了。<br>好了，文章到这里也就结束了，欢迎大家拍砖！！！</p>
+<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p><a color="red" href="https://hadooptutorial.wikispaces.com/Custom+partitioner" target="_blank" rel="external"><br>就这里的例子，数据这里也有</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
     
       
 
@@ -1085,7 +1212,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>

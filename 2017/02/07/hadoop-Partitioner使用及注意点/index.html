@@ -84,22 +84,22 @@
 
 
 
-<meta name="description" content="前言通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中1start-dfs.sh">
+<meta name="description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~
+我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？当然是可以的是。
+你只需要创建一个类继承org.apache.hadoop.ma">
 <meta property="og:type" content="article">
-<meta property="og:title" content="eclipse配置运行HDFS">
-<meta property="og:url" content="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/index.html">
+<meta property="og:title" content="hadoop Partitioner使用及注意点">
+<meta property="og:url" content="http://yoursite.com/2017/02/07/hadoop-Partitioner使用及注意点/index.html">
 <meta property="og:site_name" content="小墨鱼">
-<meta property="og:description" content="前言通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中1start-dfs.sh">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/01.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/02.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/03.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/04.png?raw=true">
-<meta property="og:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/05.png?raw=true">
-<meta property="og:updated_time" content="2017-01-24T09:24:16.000Z">
+<meta property="og:description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~
+我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？当然是可以的是。
+你只需要创建一个类继承org.apache.hadoop.ma">
+<meta property="og:updated_time" content="2017-02-07T08:00:09.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="eclipse配置运行HDFS">
-<meta name="twitter:description" content="前言通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中1start-dfs.sh">
-<meta name="twitter:image" content="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/01.png?raw=true">
+<meta name="twitter:title" content="hadoop Partitioner使用及注意点">
+<meta name="twitter:description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~
+我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？当然是可以的是。
+你只需要创建一个类继承org.apache.hadoop.ma">
 
 
 
@@ -120,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/02/07/hadoop-Partitioner使用及注意点/"/>
 
-  <title> eclipse配置运行HDFS | 小墨鱼 </title>
+  <title> hadoop Partitioner使用及注意点 | 小墨鱼 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -281,7 +281,7 @@
             
             
               
-                eclipse配置运行HDFS
+                hadoop Partitioner使用及注意点
               
             
           </h1>
@@ -293,8 +293,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2017-01-23T15:49:48+08:00" content="2017-01-23">
-              2017-01-23
+            <time itemprop="dateCreated" datetime="2017-02-07T15:18:46+08:00" content="2017-02-07">
+              2017-02-07
             </time>
           </span>
 
@@ -305,8 +305,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2017/01/23/eclipse配置运行HDFS/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/23/eclipse配置运行HDFS/" itemprop="commentsCount"></span>
+                <a href="/2017/02/07/hadoop-Partitioner使用及注意点/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/07/hadoop-Partitioner使用及注意点/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -336,29 +336,22 @@
       
 
       
-        <p>前言<br>通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">start-dfs.sh</div></pre></td></tr></table></figure></p>
-<a id="more"></a>
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>通常我们在运行HDFS都是编译源码并配置Hadoop环境变量，然后进入sbin目录中<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">start-dfs.sh</div></pre></td></tr></table></figure></p>
-<p>用来启动hdfs的，如果想要看看NameNode的启动是不是需要配置远程调试了。（我以前弄过，但是之前没有写过博客）。</p>
-<p>如果可以在本地就可以调试这些内容是不是更能了解内部是如何处理的。</p>
-<h3 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h3><p>需要准备什么东东呢？<br>hadoop源码（我用的是2.7.0，你们随意）<br>IDEA或者eclipse等等用来导入源码，方便阅读。</p>
-<p>假设以上内容已经齐全，现在开始进入主题。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mvn install -DskipTests</div><div class="line">mvn eclipse:eclipse -DdownloadSources=<span class="literal">true</span> -DdownloadJavadocs=<span class="literal">true</span></div></pre></td></tr></table></figure>
-<p>导入之后，找到hdfs项目的NameNode和DataNode运行即可。<br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/01.png?raw=true" alt="项目图"><br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/02.png?raw=true" alt="NN"><br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/03.png?raw=true" alt="DT"></p>
-<p>你以为这就结束了？？？</p>
-<p>接下来，我来说说在部署和启动遇到的问题吧。</p>
-<p>1、webapps/hdfs not found in CLASSPATH<br>出现这个异常是在启动NameNode的时候出现的，下面是具体抛出异常的代码(hadoop-common项目http包下的HttpServer2)</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> String <span class="title">getWebAppsPath</span><span class="params">(String appName)</span> <span class="keyword">throws</span> FileNotFoundException </span>&#123;</div><div class="line">   URL url = getClass().getClassLoader().getResource(<span class="string">"webapps/"</span> + appName);</div><div class="line">   <span class="keyword">if</span> (url == <span class="keyword">null</span>)</div><div class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> FileNotFoundException(<span class="string">"webapps/"</span> + appName</div><div class="line">         + <span class="string">" not found in CLASSPATH"</span>);</div><div class="line">   String urlString = url.toString();</div><div class="line">   <span class="keyword">return</span> urlString.substring(<span class="number">0</span>, urlString.lastIndexOf(<span class="string">'/'</span>));</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-<p>当我debug的时候，他一直找我的hadoop-common的jar的webapp中的hdfs目录，所以导致我一直出现<br>找不到的异常，后来我重写一个该类指定hdfs项目的路径解决可以运行（如果还有其他的解决方案请在评论下方说明一下，万分感谢!）, 还有个datanode目录没有找到的异常是在运行DataNode出现的<br>具体出现的位置我给忘记了，😝😝😝😝</p>
-<p>2、Exception in thread “main” java.lang.IllegalArgumentException: Invalid URI for NameNode address (check fs.defaultFS): file:/// has no authority.</p>
-<p>出现此异常首先去stackoverflow找了下答案，如下：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line"> <span class="tag">&lt;<span class="name">property</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.defaultFS<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://10.100.20.168/<span class="tag">&lt;/<span class="name">value</span>&gt;</span></div><div class="line"> <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<p>但是对我是无效的，后来知道原因我使用的是core-default.xml的配置没有生效。<br>但是一开始我就是defualt的配置也能正常运行。。。（奇怪的问题）</p>
-<p>如下代码是抛出异常的代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> InetSocketAddress <span class="title">getAddress</span><span class="params">(URI filesystemURI)</span> </span>&#123;</div><div class="line">    String authority = filesystemURI.getAuthority();</div><div class="line">    <span class="keyword">if</span> (authority == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(String.format(</div><div class="line">          <span class="string">"Invalid URI for NameNode address (check %s): %s has no authority."</span>,</div><div class="line">          FileSystem.FS_DEFAULT_NAME_KEY, filesystemURI.toString()));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (!HdfsConstants.HDFS_URI_SCHEME.equalsIgnoreCase(</div><div class="line">        filesystemURI.getScheme())) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(String.format(</div><div class="line">          <span class="string">"Invalid URI for NameNode address (check %s): %s is not of scheme '%s'."</span>,</div><div class="line">          FileSystem.FS_DEFAULT_NAME_KEY, filesystemURI.toString(),</div><div class="line">          HdfsConstants.HDFS_URI_SCHEME));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> getAddress(authority);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-<p>至于为什么会这样，在FileSystem类中有这么一段<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String FS_DEFAULT_NAME_KEY = </div><div class="line">                   CommonConfigurationKeys.FS_DEFAULT_NAME_KEY;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_FS = </div><div class="line">                   CommonConfigurationKeys.FS_DEFAULT_NAME_DEFAULT;</div><div class="line"></div><div class="line"><span class="comment">/*</span></div><div class="line">    // CommonConfigura.java</div><div class="line">    public static final String  FS_DEFAULT_NAME_KEY = "fs.defaultFS";</div><div class="line">    public static final String  FS_DEFAULT_NAME_DEFAULT = "file:///";</div><div class="line"></div><div class="line">*/</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> URI <span class="title">getDefaultUri</span><span class="params">(Configuration conf)</span> </span>&#123;</div><div class="line">    <span class="comment">// 这里就是创建URI对象, 各位可以单独写个Test来看看创建的对象数据。</span></div><div class="line">    <span class="comment">// URI uri = new URI("file:///");</span></div><div class="line">    <span class="keyword">return</span> URI.create(fixName(conf.get(FS_DEFAULT_NAME_KEY, DEFAULT_FS)));</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
-<p>至此，我这里就把我遇到的问题全部说完了。</p>
-<p>最后，在给大家演示一下，我运行hadoop fs -put localPath hdfsPath是如何断点的。<br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/04.png?raw=true" alt="put"><br><img src="https://github.com/basebase/img_server/blob/master/eclipse%E9%85%8D%E7%BD%AE%E8%BF%90%E8%A1%8CHDFS/05.png?raw=true" alt="put-d"></p>
-<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p><a href="https://wiki.apache.org/hadoop/EclipseEnvironment" target="_blank" rel="external">https://wiki.apache.org/hadoop/EclipseEnvironment</a></p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?<br>其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。<br>可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~</p>
+<p>我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？<br>当然是可以的是。</p>
+<p>你只需要创建一个类继承org.apache.hadoop.mapreduce.Partitioner<br>类就可以完全定义自己想要的分区方式。<br>然后在job中设置自定义的Partitioner类即可。<br>但是，这样写真的就结束了吗？</p>
+<h3 id="一个例子"><a href="#一个例子" class="headerlink" title="一个例子"></a>一个例子</h3><p>PartitionMapper.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(Object key, Text value, Context context)</span></span></div><div class="line">            <span class="keyword">throws</span> IOException, InterruptedException &#123;</div><div class="line">        String[] tokens = value.toString().split(<span class="string">","</span>);</div><div class="line">        String gender = tokens[<span class="number">2</span>];</div><div class="line">        String nameAgeScore = tokens[<span class="number">0</span>] + <span class="string">","</span> + tokens[<span class="number">1</span>] + <span class="string">","</span> + tokens[<span class="number">3</span>];</div><div class="line">        context.write(<span class="keyword">new</span> Text(gender), <span class="keyword">new</span> Text(nameAgeScore));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>AgePartitioner.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPartition</span><span class="params">(Text key, Text value, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</div><div class="line">        </div><div class="line">        String[] nameAgeScore = value.toString().split(<span class="string">","</span>);</div><div class="line">        String age = nameAgeScore[<span class="number">1</span>];</div><div class="line">        <span class="keyword">int</span> ageInt = Integer.parseInt(age);</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (numPartitions == <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (ageInt &lt;= <span class="number">20</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (ageInt &gt; <span class="number">20</span> &amp;&amp; ageInt &lt;= <span class="number">50</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="number">1</span> % numPartitions;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">return</span> <span class="number">2</span> % numPartitions;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>ParitionReducer.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;Text&gt; values, Context context)</span></span></div><div class="line">            <span class="keyword">throws</span> IOException, InterruptedException &#123;</div><div class="line">        </div><div class="line">        <span class="keyword">int</span> maxScore = Integer.MIN_VALUE;</div><div class="line">        String name = <span class="string">""</span>;</div><div class="line">        String age = <span class="string">""</span>;</div><div class="line">        String gender = <span class="string">""</span>;</div><div class="line">        </div><div class="line">        <span class="keyword">int</span> score = <span class="number">0</span>;</div><div class="line">        <span class="keyword">for</span> (Text val : values) &#123;</div><div class="line">            String[] valTokens = val.toString().split(<span class="string">","</span>);</div><div class="line">            score = Integer.parseInt(valTokens[<span class="number">2</span>]);</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (score &gt; maxScore) &#123;</div><div class="line">                name = valTokens[<span class="number">0</span>];</div><div class="line">                age = valTokens[<span class="number">1</span>];</div><div class="line">                gender = key.toString();</div><div class="line">                maxScore = score;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        context.write(<span class="keyword">new</span> Text(name), <span class="keyword">new</span> Text(<span class="string">"age- "</span> + age + <span class="string">","</span> + gender + <span class="string">","</span> + <span class="string">" score-"</span> + maxScore));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>驱动类，具体的模板代码我就不再写入，只将Partitioner设置展示<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">job.setPartitionerClass(AgePartitioner.class);</div></pre></td></tr></table></figure></p>
+<p>以上这个例子，是我在其它文章中截取下来的，具体地址，会在链接中给出。<br>现在，你可以运行该例子，你会发现Reduce输出的只有一个文件，然后你还会发现其实使用的并非是自定义<br>的Partitioner类。</p>
+<p>一开始的时候，我有点懵逼了。what？我的设置没有生效吗？<br>你的设置是没有问题的，但是你却忘记了一项重要的事情。究竟是什么事情呀，快点说说呀（臭鱼）。<br>在说出这个秘密之前，我们看看map的context.write()这个方法是怎么做的吧。</p>
+<p>MapTask.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(K key, V value)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</div><div class="line">      collector.collect(key, value,</div><div class="line">                        partitioner.getPartition(key, value, partitions));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>其中partitioner是在哪里定义的呢？<br>在NewOutputCollector类中，该类作为MapTask内部类。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">NewOutputCollector</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt;</span></div><div class="line">    <span class="keyword">extends</span> <span class="title">org</span>.<span class="title">apache</span>.<span class="title">hadoop</span>.<span class="title">mapreduce</span>.<span class="title">RecordWriter</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; &#123;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> MapOutputCollector&lt;K,V&gt; collector;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> org.apache.hadoop.mapreduce.Partitioner&lt;K,V&gt; partitioner;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> partitions;</div><div class="line"></div><div class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>)</div><div class="line">    NewOutputCollector(org.apache.hadoop.mapreduce.JobContext jobContext,</div><div class="line">                       JobConf job,</div><div class="line">                       TaskUmbilicalProtocol umbilical,</div><div class="line">                       TaskReporter reporter</div><div class="line">                       ) <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</div><div class="line">      collector = createSortingCollector(job, reporter);</div><div class="line">      partitions = jobContext.getNumReduceTasks();</div><div class="line">      <span class="keyword">if</span> (partitions &gt; <span class="number">1</span>) &#123;</div><div class="line">        partitioner = (org.apache.hadoop.mapreduce.Partitioner&lt;K,V&gt;)</div><div class="line">          ReflectionUtils.newInstance(jobContext.getPartitionerClass(), job);</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        partitioner = <span class="keyword">new</span> org.apache.hadoop.mapreduce.Partitioner&lt;K,V&gt;() &#123;</div><div class="line">          <span class="meta">@Override</span></div><div class="line">          <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPartition</span><span class="params">(K key, V value, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> partitions - <span class="number">1</span>;</div><div class="line">          &#125;</div><div class="line">        &#125;;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...</div></pre></td></tr></table></figure></p>
+<p>我们来看看构造函数之中，如果partitions大于1就从配置中读取我们自己的Partitioner对象并实例化给引用，否则自己就创建一个实例。<br>那partitions是从jobContext.getNumReduceTasks();读取出来的，这个要怎么配置呢？</p>
+<font color="DeepPink" size="3"><br>job.setNumReduceTasks(number);<br></font>
+
+<p>配置该值之后，那么就可以使用我们自己定义的分区函数了。<br>好了，文章到这里也就结束了，欢迎大家拍砖！！！</p>
+<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p><a color="red" href="https://hadooptutorial.wikispaces.com/Custom+partitioner" target="_blank" rel="external"><br>就这里的例子，数据这里也有</a></p>
 
       
     </div>
@@ -401,17 +394,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/11/14/java自旋锁/" rel="next" title="java自旋锁">
-                <i class="fa fa-chevron-left"></i> java自旋锁
+              <a href="/2017/02/03/mapreduce-join/" rel="next" title="mapreduce join">
+                <i class="fa fa-chevron-left"></i> mapreduce join
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/02/03/mapreduce-join/" rel="prev" title="mapreduce join">
-                mapreduce join <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -426,10 +415,10 @@
 
     <div class="post-spread">
       
-        <div class="ds-share flat" data-thread-key="2017/01/23/eclipse配置运行HDFS/"
-     data-title="eclipse配置运行HDFS"
+        <div class="ds-share flat" data-thread-key="2017/02/07/hadoop-Partitioner使用及注意点/"
+     data-title="hadoop Partitioner使用及注意点"
      data-content=""
-     data-url="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/">
+     data-url="http://yoursite.com/2017/02/07/hadoop-Partitioner使用及注意点/">
   <div class="ds-share-inline">
     <ul  class="ds-share-icons-16">
 
@@ -456,8 +445,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2017/01/23/eclipse配置运行HDFS/"
-           data-title="eclipse配置运行HDFS" data-url="http://yoursite.com/2017/01/23/eclipse配置运行HDFS/">
+      <div class="ds-thread" data-thread-key="2017/02/07/hadoop-Partitioner使用及注意点/"
+           data-title="hadoop Partitioner使用及注意点" data-url="http://yoursite.com/2017/02/07/hadoop-Partitioner使用及注意点/">
       </div>
     
   </div>
@@ -534,7 +523,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实战"><span class="nav-number">2.</span> <span class="nav-text">实战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链接"><span class="nav-number">3.</span> <span class="nav-text">链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个例子"><span class="nav-number">2.</span> <span class="nav-text">一个例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链接"><span class="nav-number">3.</span> <span class="nav-text">链接</span></a></li></ol></div>
             
           </div>
         </section>
