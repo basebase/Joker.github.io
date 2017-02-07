@@ -84,22 +84,16 @@
 
 
 
-<meta name="description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~
-我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？当然是可以的是。
-你只需要创建一个类继承org.apache.hadoop.ma">
+<meta name="description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="hadoop Partitioner使用及注意点">
 <meta property="og:url" content="http://yoursite.com/2017/02/07/hadoop-Partitioner使用及注意点/index.html">
 <meta property="og:site_name" content="小墨鱼">
-<meta property="og:description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~
-我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？当然是可以的是。
-你只需要创建一个类继承org.apache.hadoop.ma">
-<meta property="og:updated_time" content="2017-02-07T08:00:09.000Z">
+<meta property="og:description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。">
+<meta property="og:updated_time" content="2017-02-07T08:02:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="hadoop Partitioner使用及注意点">
-<meta name="twitter:description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~
-我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？当然是可以的是。
-你只需要创建一个类继承org.apache.hadoop.ma">
+<meta name="twitter:description" content="前言hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。">
 
 
 
@@ -222,7 +216,7 @@
             
               <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
             
-            Suche
+            Search
           </a>
         </li>
       
@@ -336,7 +330,8 @@
       
 
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?<br>其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。<br>可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~</p>
+        <p>前言<br>hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?<br>其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。<br><a id="more"></a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?<br>其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。<br>可能早有前辈已经指出该问题了。但还是容我自己做一个小小的记录，哈哈哈~~~</p>
 <p>我们知道map数据会写入到分区，默认的分区只有一个，但是我想要10个又或者是100个，可以吗？<br>当然是可以的是。</p>
 <p>你只需要创建一个类继承org.apache.hadoop.mapreduce.Partitioner<br>类就可以完全定义自己想要的分区方式。<br>然后在job中设置自定义的Partitioner类即可。<br>但是，这样写真的就结束了吗？</p>
 <h3 id="一个例子"><a href="#一个例子" class="headerlink" title="一个例子"></a>一个例子</h3><p>PartitionMapper.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(Object key, Text value, Context context)</span></span></div><div class="line">            <span class="keyword">throws</span> IOException, InterruptedException &#123;</div><div class="line">        String[] tokens = value.toString().split(<span class="string">","</span>);</div><div class="line">        String gender = tokens[<span class="number">2</span>];</div><div class="line">        String nameAgeScore = tokens[<span class="number">0</span>] + <span class="string">","</span> + tokens[<span class="number">1</span>] + <span class="string">","</span> + tokens[<span class="number">3</span>];</div><div class="line">        context.write(<span class="keyword">new</span> Text(gender), <span class="keyword">new</span> Text(nameAgeScore));</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
