@@ -4,6 +4,59 @@
   
     
     <entry>
+      <title><![CDATA[mysql学习笔记-事务隔离级别]]></title>
+      <url>http://yoursite.com/2017/03/05/mysql%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</url>
+      <content type="html"><![CDATA[<p>事务是什么？<br>  事务就是一组原子性的SQL查询，或者说一个独立的工作单元。如果数据库引擎能够<br>  成功的对数据库应用该组查询的全部语句，那么执行该组查询。如果其中有任何一条语句因为崩溃<br>  或者其它原因无法执行，那么所有的语句都不会执行。也就说，事务内的语句，要么全部执行成功，<br>  要么全部执行失败。</p>
+<a id="more"></a>
+<h3 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h3><h4 id="事务是什么？"><a href="#事务是什么？" class="headerlink" title="事务是什么？"></a>事务是什么？</h4><p>  事务就是一组原子性的SQL查询，或者说一个独立的工作单元。如果数据库引擎能够<br>  成功的对数据库应用该组查询的全部语句，那么执行该组查询。如果其中有任何一条语句因为崩溃<br>  或者其它原因无法执行，那么所有的语句都不会执行。也就说，事务内的语句，要么全部执行成功，<br>  要么全部执行失败。</p>
+<h3 id="事务的特性ACID"><a href="#事务的特性ACID" class="headerlink" title="事务的特性ACID"></a>事务的特性ACID</h3><p>银行的例子是解释事务最好的例子，假设一个银行的数据库有两张表：支票(checking)和储蓄(savings)<br>表。现在要从用户小墨鱼的支票账户转移200元到小美的储蓄账户，那么至少需要三个步骤：</p>
+<p>1、检查支票账户的余额高于200元<br>2、丛支票账户余额中减去200元<br>3、在储蓄账户账户中增加200元</p>
+<p>上述三个步骤必须打包在一个事务中，任何一个步骤失败，则必须回滚所有的步骤。</p>
+<p>我么可以使用<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">start</span> <span class="keyword">transaction</span></div></pre></td></tr></table></figure></p>
+<p>开启一个事务，然后使用COMMIT提交事务将修改的数据持久保留，要么使用ROLLBACK撤销<br>所有的修改。事务SQL的样本如下:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">start</span> <span class="keyword">transaction</span>;</div><div class="line"><span class="keyword">select</span> balance <span class="keyword">from</span> checking <span class="keyword">where</span> customer_id = <span class="number">111</span>;</div><div class="line"><span class="keyword">update</span> checking <span class="keyword">set</span> balance = balance - <span class="number">200</span> <span class="keyword">where</span> customer_id = <span class="number">111</span>;</div><div class="line"><span class="keyword">update</span> savings <span class="keyword">set</span> balance = balance + <span class="number">200</span> <span class="keyword">where</span> customer_id = <span class="number">111</span>;</div></pre></td></tr></table></figure>
+<p>单纯的事务概念并不是故事的全部。试想一下，如果执行到第四条语句的时候服务器崩溃了，会发生什么?<br>天知道用户会损失200元。再假如，在执行到第三条第四条语句之间时，另外一个进程要删除支票账户<br>上的所有余额，那么结果可能就是银行在不知道这个逻辑的情况下白送200元。</p>
+<p>除非系统通过严格的ACID测试，否则空谈事务的概念是不够的。<br>ACID表示原子性(Atomicity)、一致性(consistency)、隔离性(isolation)和持久性(durability)<br>一个运行良好的事务处理系统，必须具备这些标准的特征。</p>
+<p><font color="DeepPink" size="2"> 原子性: </font><br>  一个事务必须被视为一个不可分割的最小工作单元，整个事务中的所有操作要么全部提交成功，<br>  要么全部失败回滚，对于一个事务来说，不可能只执行其中的一部分操作，这就是事务的原子性。</p>
+<p><font color="DeepPink" size="2"> 一致性: </font><br>  数据库总是从一个一致性的状态转换到另一个一致性状态。在前面的例子中，一致性确保了，即使<br>  执行第三、四条语句之间系统崩溃，支票的账户中也不会有损失，因为事务最终没有提交，所以<br>  事务中所做的修改也不会保存到数据库中。</p>
+<p><font color="DeepPink" size="2"> 隔离性:</font><br>  通常来说，一个事务所做的修改在最终提交以前，对其它事务是不可见的。在前面的例子中，当执行<br>  完第三条语句、第四条语句还未开始时，此时有另外一个账户汇总程序开始运行，则其看到的支票账户的<br>  余额并没有被减去200元。</p>
+<p><font color="DeepPink" size="2"> 持久性: </font><br>  一旦事务提交，则其所做的修改就会永久保存到数据库中。此时即使系统崩溃，修改的数据也不会<br>  丢失。持久性是个有点模糊的概念，因为实际上持久性也分很多不同级别。有些持久性策略能够提供<br>  非常强的安全保障，而有些则未必。而且不可能有做到100%的持久性保障策略。</p>
+<p>一个实现了ACID的数据库，相比没有实现ACID的数据库，通常会需要更强的CPU处理能力、更大的<br>内存和更多的磁盘空间。</p>
+<h3 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h3><p>隔离性其实比想象的要复杂，在SQL标准中定义了四种隔离级别，每一种级别都规定了一个事务中所<br>做的修改，哪些在事务内和事务间可见的，哪些是不可见的。较低级别的隔离通常可以执行更高的并发，<br>系统的开销也比较低。</p>
+<p>每种存储引擎实现的隔离级别不尽相同。如果熟悉其它的数据库产品，可能会发现某些特性和你期望的<br>会有一些不同，可以根据所选择的引擎查阅相关的手册。</p>
+<p>下面简单的介绍一下四种隔离级别。</p>
+<p><font color="DeepPink" size="2"> READ UNCOMMITTED(未提交读) </font><br>  在READ UNCOMMITTED级别，事务中的修改，即使没有提交，对其它事务也是可见的。<br>  事务可以读取为提交的数据，这也被称为“脏读”。这个级别会导致很多问题，从性能上<br>  来说，READ UNCOMMITTED不会比其它的级别好太多，但缺乏其它级别的很多好处，除非<br>  真的有非常必要的理由，在实际应用中一般很少使用。</p>
+<p><font color="DeepPink" size="2"> READ COMMITTED(提交读) </font><br>  大多数数据库的默认隔离级别都是READ COMMITTED（但mysql不是）。READ COMMITTED满足<br>  前面提到的隔离性的简单定义：一个事务开始时，只能“看见”已经提交的事务所做的改变。<br>  换句话说，一个事务从开始直到提交之前，所做的任何修改对其它事务是不可见的。这个级别<br>  有时候也叫“不可重复读”，因为两次执行同样的查询，可能会得到不一样的结果。</p>
+<p><font color="DeepPink" size="2"> REPEATABLE READ(可重复读) </font><br>  REPEATABLE READ解决了脏读的问题，该级别保证了在同一个事务中多次读取同样记录的结果是<br>  一致的。但是理论上，可重复读隔离级别还是无法解决另外一个幻读的问题。所谓的幻读，指的是<br>  当某个事务在读取某个范围内的记录时，另外一个事务又在该范围内插入了新的记录，当之前的事务<br>  再次读取该范围的记录时，会产生幻行。InnoDB和XtraDB存储引擎通过多版本并发控制(MVCC)<br>  解决了幻读的问题。可重复读是mysql默认事务隔离级别。</p>
+<p><font color="DeepPink" size="2"> SERIALIZABLE(可串行化) </font><br>  SERIALIZABLE是最高的隔离级别。它通过强制事务串行执行，避免了前面说的幻读问题。<br>  简单来说，SERIALIZABLE会在读取的每一行数据上都加锁，所以可能导致大量的超时和锁<br>  争用的情况。实际应用中也很少用到这个隔离级别，只有在非常需要确保数据一致性而且可以接受<br>  没有并发的情况下，才考虑采用该级别。</p>
+<p>其实，文章到这里已经就要结束的。<br>不过还要一些内容顺带一起写上去😏。。。</p>
+<h3 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h3><p>死锁指的是两个或者多个事务在同一资源上相互占用，并请求锁定对方占用的资源，从而导致<br>而行循环现象。当多个事务视图以不同顺序锁定资源时，就可能会产生死锁。<br>多个事务同事锁定同一个资源时，也会产生死锁。例如，设想下面两个事务同时处理StockPrice表：</p>
+<p>事务1</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">start</span> <span class="keyword">transaction</span>;</div><div class="line"><span class="keyword">update</span> stockprice <span class="keyword">set</span> <span class="keyword">close</span> = <span class="number">22</span> <span class="keyword">where</span> stock_id = <span class="number">4</span> <span class="keyword">and</span> <span class="built_in">date</span> = <span class="string">'2017-01-01'</span></div><div class="line"><span class="keyword">update</span> stockprice <span class="keyword">set</span> <span class="keyword">close</span> = <span class="number">11</span> <span class="keyword">where</span> stock_id = <span class="number">3</span> <span class="keyword">and</span> <span class="built_in">date</span> = <span class="string">'2017-02-03'</span></div><div class="line"><span class="keyword">commit</span>;</div></pre></td></tr></table></figure>
+<p>事务2</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">start</span> <span class="keyword">transaction</span>;</div><div class="line"><span class="keyword">update</span> stockprice <span class="keyword">set</span> <span class="keyword">high</span> = <span class="number">20.12</span> <span class="keyword">where</span> stock_id = <span class="number">3</span> <span class="keyword">and</span> <span class="built_in">date</span> = <span class="string">'2017-02-03'</span></div><div class="line"><span class="keyword">update</span> stockprice <span class="keyword">set</span> <span class="keyword">high</span> = <span class="number">47.20</span> <span class="keyword">where</span> stock_id = <span class="number">4</span> <span class="keyword">and</span> <span class="built_in">date</span> = <span class="string">'2017-01-01'</span></div><div class="line"><span class="keyword">commit</span>;</div></pre></td></tr></table></figure>
+<p>如果凑巧，两个事务都执行了第一条UPDATE语句，更新了一行数据，同时也锁定了该行数据，接着<br>每个事务都尝试去执行第二条UPDATE语句，却发现改行已经被对方锁定，然后两个事务都等待对方<br>释放锁，同事又持有对方需要的锁，则陷入死循环。除非有外部因素介入才可能解除死锁。</p>
+<p>InnoDB目前解决死锁的方法是，将持有最少行级排它锁的事务进行回滚。</p>
+<p>锁定行为和顺序是和存储引擎有关的。同样的顺序执行语句，有些存储引擎会产生死锁，有些则不会。<br>死锁产生有双重原因：有些是因为真正的数据冲突，这种情况通常很难避免，但有些则完全是由存储引擎<br>的实现方式导致的。</p>
+<p>死锁发生以后，只有部分或者完全回滚其中一个事务，才能打破死锁。对于事务型的系统，这是无法避免的，<br>所以应用程序在设计时必须考虑如何处理死锁。大多数情况下只需要重新执行因死锁的回滚事务。</p>
+<h3 id="多版本并发控制"><a href="#多版本并发控制" class="headerlink" title="多版本并发控制"></a>多版本并发控制</h3><p>MySQL的大多数事务型存储引擎实现的都不是简单的行级锁。基于提升并发性能的考虑，他们一般<br>都同时实现了多版本并发控制(MVCC)。不仅是MySQL，包括Oracle、PostgreSQL等其他数据库<br>也都实现了MVCC，但各自的实现机制不尽相同，因为MVCC没有一个统一的的实现标准。</p>
+<p>可以认为MVCC是行级锁的一个变种，但是它在很多情况下避免了加锁的操作，因此开销更低。<br>虽然实现机制有所不同，但大多实现了非阻塞的读操作，写操作也只锁定必要的行。</p>
+<p>MVCC的实现，是通过保存数据在某个时间点的快照来实现的。也就是说，不管需要执行多长时间，<br>每个事务看到的数据都是一致的。根据事务开始的不同，每个事务对同一张表，同一时刻看到的数据<br>可能是不一样的(因为不同的时间点可能数据就已经产生了不同的快照版本，而每个事务在默认的RR隔离级别下只能看到事务开始时的数据快照)。</p>
+<p>前面说到不同存储引擎的MVCC实现是不同的，典型的有乐观(optimistic)并发控制和<br>悲观(pessimistic)并发控制。下面通过InnoDB的简化版行为来说明MVCC是如何工作的。</p>
+<p>InnoDB的MVCC，是通过每行记录后面保存两个隐藏的列来实现的。这两个列：一个是保存了行的创建时间，<br>一个保存行的过期时间(或删除时间)。当然存储的并不是实际的时间值，而是系统版本号。没开始一个<br>新的事务，系统版本号会自动增加。事务开始时刻的系统版本号会作为事务的版本号，用来和查询到的<br>每行记录的版本号进行比较。下面看一下在REPEATABLE READ隔离级别下，MVCC具体是如何操作的。</p>
+<p>SELECT<br>  InnoDB会根据以下两个条件检查每行记录：<br>    a) InnoDB只查找版本早于当前事务版本的数据行(也就是，行的版本号小于或等于事务的系统版本号)<br>       这样可以确保事务读取的行，要么是在事务开始之前已经存在的，要么是事务自身插入或者修改过的。</p>
+<pre><code>b) 行的删除版本要么未定义，要么大于当前事务版本号。这样可以确保事务读取到的行，在
+   事务开始之前为被删除。
+</code></pre><p>INSERT<br>  InnoDB为新插入的每一行保存当前系统版本号作为行版本号。</p>
+<p>DELETE<br>  InnoDB为删除的每一行保存当前系统版本号作为删除标识。</p>
+<p>UPDATE<br>  InnoDB为插入一行新记录，保存当前系统版本号做为行版本号，同时保存当前系统版本号<br>  到原来的行为作为删除标识。</p>
+<p>保存着两个额外系统版本号，使大多数读操作都可以不用加锁。这样设计使得读数据操作很简单，<br>性能很好，并且也能保证只会读取到符合标准的行。不足之处就是每行记录都需要额外的存储空间，<br>需要做更多检查工作，以及一些额外的维护工作。</p>
+<p>MVCC只在PEPEATABLE READ 和 READ COMMITTED两个隔离级别下工作。<br>其它两个隔离级别都和MVCC不兼容，因为READ UNCOMMITTED总是读取到最新的数据行，而不是<br>符合当前事务版本的数据行。而SERIALIZABLE则会对所有读取的行都加锁。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="http://www.jianshu.com/p/8d735db9c2c0" target="_blank" rel="external">http://www.jianshu.com/p/8d735db9c2c0</a>  【隔离级别实战】<br><a href="http://tech.meituan.com/innodb-lock.html" target="_blank" rel="external">http://tech.meituan.com/innodb-lock.html</a>  【美团的博客质量向来都比较高】</p>
+]]></content>
+    </entry>
+    
+    <entry>
       <title><![CDATA[hadoop Partitioner使用及注意点]]></title>
       <url>http://yoursite.com/2017/02/07/hadoop-Partitioner%E4%BD%BF%E7%94%A8%E5%8F%8A%E6%B3%A8%E6%84%8F%E7%82%B9/</url>
       <content type="html"><![CDATA[<p>前言<br>hadoop已经出来这么长时间了，分区的文章早已经多如牛毛，为何你还要写呢?<br>其实呢，这篇文章主要是想要介绍一下使用MR自定义分区需要注意的一些点。<br><a id="more"></a></p>
