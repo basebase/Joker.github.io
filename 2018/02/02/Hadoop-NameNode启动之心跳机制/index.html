@@ -1,0 +1,796 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/images/create_thumb.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="前言HDFS的心跳机制是如何设计的？如果我们自己来做又是如果判断一个服务是否有效?假设不是一个分布式程序，而是一个多线程程序。有10个线程，一个master线程，9个slave线程。你需要知道这9个slave线程是否还是活跃有效的。那么，在本文最后会给出一些不错的文章链接。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop NameNode启动之心跳机制">
+<meta property="og:url" content="http://yoursite.com/2018/02/02/Hadoop-NameNode启动之心跳机制/index.html">
+<meta property="og:site_name" content="小墨鱼">
+<meta property="og:description" content="前言HDFS的心跳机制是如何设计的？如果我们自己来做又是如果判断一个服务是否有效?假设不是一个分布式程序，而是一个多线程程序。有10个线程，一个master线程，9个slave线程。你需要知道这9个slave线程是否还是活跃有效的。那么，在本文最后会给出一些不错的文章链接。">
+<meta property="og:updated_time" content="2018-02-02T07:57:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hadoop NameNode启动之心跳机制">
+<meta name="twitter:description" content="前言HDFS的心跳机制是如何设计的？如果我们自己来做又是如果判断一个服务是否有效?假设不是一个分布式程序，而是一个多线程程序。有10个线程，一个master线程，9个slave线程。你需要知道这9个slave线程是否还是活跃有效的。那么，在本文最后会给出一些不错的文章链接。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/02/Hadoop-NameNode启动之心跳机制/"/>
+
+  <title> Hadoop NameNode启动之心跳机制 | 小墨鱼 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', '83363914', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">小墨鱼</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">受尽苦难而不厌，此乃阿修罗之道</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Suche
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+
+
+
+
+
+
+
+    
+      <header class="post-header">
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Hadoop NameNode启动之心跳机制
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2018-02-02T10:13:35+08:00" content="2018-02-02">
+              2018-02-02
+            </time>
+          </span>
+
+          
+
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2018/02/02/Hadoop-NameNode启动之心跳机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/02/02/Hadoop-NameNode启动之心跳机制/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o">热度</i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>℃
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>HDFS的心跳机制是如何设计的？如果我们自己来做又是如果判断一个服务是否有效?<br>假设不是一个分布式程序，而是一个多线程程序。有10个线程，一个master线程，9个slave线程。<br>你需要知道这9个slave线程是否还是活跃有效的。<br>那么，在本文最后会给出一些不错的文章链接。</p>
+<a id="more"></a>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>那么到底是谁给谁发送心跳呢？一般来说是DataNode向NameNode发送心跳，然后判断DataNode是否已经失效了。那么DataNode是如何发送心跳的呢?</p>
+<p>DataNode.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">    LOG.info(<span class="string">"Starting DataNode in: "</span>+data.data);</div><div class="line">    <span class="keyword">while</span> (shouldRun) &#123; <span class="comment">// 当datanode停止服务的时候, 改变了会由true变为false</span></div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            offerService(); <span class="comment">// 查看这里</span></div><div class="line">        &#125; <span class="keyword">catch</span> (Exception ex) &#123;</div><div class="line">            LOG.info(<span class="string">"Exception: "</span> + ex);</div><div class="line">          <span class="keyword">if</span> (shouldRun) &#123;</div><div class="line">            LOG.info(<span class="string">"Lost connection to namenode.  Retrying..."</span>);</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">              Thread.sleep(<span class="number">5000</span>); <span class="comment">// 5秒钟发送一次心跳</span></div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</div><div class="line">            &#125;</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">  LOG.info(<span class="string">"Finishing DataNode in: "</span>+data.data);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">offerService</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">    <span class="keyword">long</span> wakeups = <span class="number">0</span>;</div><div class="line">    <span class="keyword">long</span> lastHeartbeat = <span class="number">0</span>, lastBlockReport = <span class="number">0</span>;</div><div class="line">    <span class="keyword">long</span> sendStart = System.currentTimeMillis();</div><div class="line">    <span class="keyword">int</span> heartbeatsSent = <span class="number">0</span>;</div><div class="line">    LOG.info(<span class="string">"using BLOCKREPORT_INTERVAL of "</span> + blockReportInterval + <span class="string">"msec"</span>);</div><div class="line"></div><div class="line">    <span class="keyword">while</span> (shouldRun) &#123;</div><div class="line">        <span class="keyword">long</span> now = System.currentTimeMillis();</div><div class="line">        <span class="keyword">synchronized</span> (receivedBlockList) &#123;</div><div class="line">            <span class="comment">// HEARTBEAT_INTERVAL = 3000 (3s)</span></div><div class="line">            <span class="comment">// 当前时间减去上一次的时间大于3秒后发送一次心跳</span></div><div class="line">            <span class="keyword">if</span> (now - lastHeartbeat &gt; HEARTBEAT_INTERVAL) &#123;</div><div class="line">                <span class="comment">// 向NameNode发送心跳, 把当前的容量和剩余的容量发送过去</span></div><div class="line">                namenode.sendHeartbeat(localName, data.getCapacity(), data.getRemaining());</div><div class="line">                <span class="comment">// 最后一次发送心跳时间记录</span></div><div class="line">                lastHeartbeat = now;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        ...</div><div class="line">    &#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>好， 接下来看一下NameNode是如何处理的?</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendHeartbeat</span><span class="params">(String sender, <span class="keyword">long</span> capacity, <span class="keyword">long</span> remaining)</span> </span>&#123;</div><div class="line">    namesystem.gotHeartbeat(<span class="keyword">new</span> UTF8(sender), capacity, remaining);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 这里加了一个对象锁的时候, 其实里面不需要加锁heartbeats,datanodeMap之类的不需要加锁</span></div><div class="line"><span class="comment">// 上面的想法是最初的, 但是忽然想到, 对象是同一个，但是你无法保证共享变量不会被多个线程</span></div><div class="line"><span class="comment">// 进行修改, 而且被修改的对象被其它对象获取到引用的时候又会出现对于的线程安全问题 [参考样例1]</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">gotHeartbeat</span><span class="params">(UTF8 name, <span class="keyword">long</span> capacity, <span class="keyword">long</span> remaining)</span> </span>&#123;</div><div class="line">    <span class="keyword">synchronized</span> (heartbeats) &#123; <span class="comment">// treeset，放入需要进行心跳的机器节点名称</span></div><div class="line">        <span class="keyword">synchronized</span> (datanodeMap) &#123;</div><div class="line">            LOG.info(<span class="string">"currThread Run =&gt; "</span> + Thread.currentThread().getName());</div><div class="line">            LOG.info(<span class="string">"cur sync ? "</span> + <span class="keyword">this</span>);</div><div class="line"></div><div class="line">            <span class="keyword">long</span> capacityDiff = <span class="number">0</span>;</div><div class="line">            <span class="keyword">long</span> remainingDiff = <span class="number">0</span>;</div><div class="line">            <span class="comment">// 获取对应节点的信息</span></div><div class="line">            DatanodeInfo nodeinfo = (DatanodeInfo) datanodeMap.get(name);</div><div class="line"></div><div class="line">            <span class="comment">// 如果是一个新节点</span></div><div class="line">            <span class="keyword">if</span> (nodeinfo == <span class="keyword">null</span>) &#123;</div><div class="line">                LOG.info(<span class="string">"Got brand-new heartbeat from "</span> + name);</div><div class="line">                nodeinfo = <span class="keyword">new</span> DatanodeInfo(name, capacity, remaining);</div><div class="line">                <span class="comment">// 加入到datanode map中</span></div><div class="line">                datanodeMap.put(name, nodeinfo);</div><div class="line">                capacityDiff = capacity;</div><div class="line">                remainingDiff = remaining;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="comment">// 这里是一个有趣的地方</span></div><div class="line">                <span class="comment">// 该节点发送了最新的容量和剩余的容量过来, 和历史节点信息进行比较</span></div><div class="line">                <span class="comment">// 假设我们的服务器扩展了新的磁盘比原来的更大</span></div><div class="line">                <span class="comment">// 那么就赋值到到对应的变量上</span></div><div class="line">                capacityDiff = capacity - nodeinfo.getCapacity();</div><div class="line">                remainingDiff = remaining - nodeinfo.getRemaining();</div><div class="line">                <span class="comment">// 不管是否改变, 这里的节点信息都要删除。</span></div><div class="line">                heartbeats.remove(nodeinfo);</div><div class="line">                <span class="comment">// 这里会进行更新节点时间以及容量</span></div><div class="line">                nodeinfo.updateHeartbeat(capacity, remaining);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="comment">// 将更新后的节点添加到心跳中</span></div><div class="line">            heartbeats.add(nodeinfo);</div><div class="line">            <span class="comment">// 并更新集群总容量大小</span></div><div class="line">            totalCapacity += capacityDiff;</div><div class="line">            totalRemaining += remainingDiff;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateHeartbeat</span><span class="params">(<span class="keyword">long</span> capacity, <span class="keyword">long</span> remaining)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>.capacityBytes = capacity; </div><div class="line">    <span class="keyword">this</span>.remainingBytes = remaining;</div><div class="line">    <span class="keyword">this</span>.lastUpdate = System.currentTimeMillis(); <span class="comment">// 当前时间</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 心跳监控线程</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">HeartbeatMonitor</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</div><div class="line">        <span class="comment">/**</span></div><div class="line">         */</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">while</span> (fsRunning) &#123;</div><div class="line">                heartbeatCheck();</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    Thread.sleep(heartBeatRecheck); <span class="comment">//1s发送一次心跳</span></div><div class="line">                &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/** 心跳检查方法 */</span></div><div class="line"><span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">heartbeatCheck</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">synchronized</span> (heartbeats) &#123;</div><div class="line">            DatanodeInfo nodeInfo = <span class="keyword">null</span>;</div><div class="line">            <span class="comment">// 如果节点最后更新的时候小于当前时间减去10分钟, 那么表示当前节点已经失去联系了</span></div><div class="line">            <span class="comment">// 10分钟我们可以认为是网络的延迟</span></div><div class="line">            <span class="keyword">while</span> ((heartbeats.size() &gt; <span class="number">0</span>) &amp;&amp;</div><div class="line">                   ((nodeInfo = (DatanodeInfo) heartbeats.first()) != <span class="keyword">null</span>) &amp;&amp;</div><div class="line">                   (nodeInfo.lastUpdate() &lt; System.currentTimeMillis() - EXPIRE_INTERVAL)) &#123;</div><div class="line">                LOG.info(<span class="string">"Lost heartbeat for "</span> + nodeInfo.getName());</div><div class="line"></div><div class="line">                <span class="comment">// 删除对应的DataNode节点信息(不在进行心跳联系)</span></div><div class="line">                heartbeats.remove(nodeInfo);</div><div class="line">                <span class="comment">// 删除对应的DataNode</span></div><div class="line">                <span class="keyword">synchronized</span> (datanodeMap) &#123;</div><div class="line">                    datanodeMap.remove(nodeInfo.getName());</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="comment">// 将该DataNode的容量从总容量中去除</span></div><div class="line">                totalCapacity -= nodeInfo.getCapacity();</div><div class="line">                totalRemaining -= nodeInfo.getRemaining();</div><div class="line"></div><div class="line">                <span class="comment">// 获取到该节点的Block信息</span></div><div class="line">                Block deadblocks[] = nodeInfo.getBlocks();</div><div class="line">                <span class="keyword">if</span> (deadblocks != <span class="keyword">null</span>) &#123;</div><div class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; deadblocks.length; i++) &#123;</div><div class="line">                        <span class="comment">// 把需要删除的block信息发送出去</span></div><div class="line">                        removeStoredBlock(deadblocks[i], nodeInfo);</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (heartbeats.size() &gt; <span class="number">0</span>) &#123;</div><div class="line">                    nodeInfo = (DatanodeInfo) heartbeats.first();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">removeStoredBlock</span><span class="params">(Block block, DatanodeInfo node)</span> </span>&#123;</div><div class="line">        <span class="comment">// 从blockMap中获取对应的节点名称信息</span></div><div class="line">        TreeSet containingNodes = (TreeSet) blocksMap.get(block);</div><div class="line">        <span class="comment">// 如果不存在的话则抛出异常</span></div><div class="line">        <span class="keyword">if</span> (containingNodes == <span class="keyword">null</span> || ! containingNodes.contains(node)) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"No machine mapping found for block "</span> + block + <span class="string">", which should be at node "</span> + node);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// 删除节点信息</span></div><div class="line">        containingNodes.remove(node);</div><div class="line"></div><div class="line">        <span class="comment">// 检查block块是否有效, 如果当前block的副本小于配置的信息, 则需要进行复制</span></div><div class="line">        <span class="keyword">if</span> (dir.isValidBlock(block) &amp;&amp; (containingNodes.size() &lt; <span class="keyword">this</span>.desiredReplication)) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (neededReplications) &#123;</div><div class="line">                neededReplications.add(block);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// ...?</span></div><div class="line">        TreeSet excessBlocks = (TreeSet) excessReplicateMap.get(node.getName());</div><div class="line">        <span class="keyword">if</span> (excessBlocks != <span class="keyword">null</span>) &#123;</div><div class="line">            excessBlocks.remove(block);</div><div class="line">            <span class="keyword">if</span> (excessBlocks.size() == <span class="number">0</span>) &#123;</div><div class="line">                excessReplicateMap.remove(node.getName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h3 id="样例"><a href="#样例" class="headerlink" title="样例"></a>样例</h3><p>例1<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">byte</span>[] b = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1</span>];</div><div class="line">        <span class="comment">// 其实res不应该是public,这样的话该变量会被其它对象获取到引用,从而修改元素,但是演示方便我置位public</span></div><div class="line">        <span class="keyword">public</span> List&lt;String&gt; res = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">        <span class="comment">// 如果仅仅只是对象锁的话，在修改res对象的时候，别的线程也在修改, 那么就出现问题了</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">write1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">            <span class="keyword">synchronized</span> (b) &#123;</div><div class="line">                System.out.println(<span class="string">"w1 res = "</span> + res);</div><div class="line">                res.add(<span class="string">"1"</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">write2</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">synchronized</span> (b) &#123;</div><div class="line">                System.out.println(<span class="string">"w2 res = "</span> + res);</div><div class="line">                res.add(<span class="string">"2"</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">        <span class="keyword">final</span> Demo demo = <span class="keyword">new</span> Demo();</div><div class="line">        Thread t1 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</div><div class="line">            </div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    demo.write1();</div><div class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                    <span class="comment">// TODO Auto-generated catch block</span></div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;, <span class="string">"t1"</span>);</div><div class="line">        </div><div class="line">        </div><div class="line">        </div><div class="line">        Thread t2 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</div><div class="line">            </div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                demo.write2();</div><div class="line">            &#125;</div><div class="line">        &#125;, <span class="string">"t2"</span>);</div><div class="line">        </div><div class="line">        t1.start();</div><div class="line">        t2.start();</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>样例2：抽取出心跳监控代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HeartbeatMonitorTest</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOG = LogFormatter.getLogger(<span class="string">"cn.base.test.HeartbeatMonitorTest"</span>);</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> heartBeatRecheck = <span class="number">3000</span>;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> fsRunning = <span class="keyword">true</span>;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> TreeMap datanodeMap = <span class="keyword">new</span> TreeMap();</div><div class="line"></div><div class="line">    <span class="keyword">private</span> TreeMap blocksMap = <span class="keyword">new</span> TreeMap();</div><div class="line"></div><div class="line">    <span class="keyword">private</span> TreeMap excessReplicateMap = <span class="keyword">new</span> TreeMap();</div><div class="line"></div><div class="line">    <span class="keyword">private</span> FSDirectory dir;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> desiredReplication;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> TreeSet neededReplications = <span class="keyword">new</span> TreeSet();</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">long</span> totalCapacity = <span class="number">0</span>, totalRemaining = <span class="number">0</span>;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">long</span> EXPIRE_INTERVAL = <span class="number">1</span> * <span class="number">60</span> * <span class="number">1000</span>;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Daemon hbthread = <span class="keyword">null</span>;</div><div class="line">    </div><div class="line">    <span class="keyword">private</span> <span class="keyword">long</span> capacityDiff = <span class="number">0</span>;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">long</span> remainingDiff = <span class="number">0</span>;</div><div class="line"></div><div class="line">    TreeSet heartbeats = <span class="keyword">new</span> TreeSet(<span class="keyword">new</span> Comparator() &#123;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Object o1, Object o2)</span> </span>&#123;</div><div class="line">            DatanodeInfo d1 = (DatanodeInfo) o1;</div><div class="line">            DatanodeInfo d2 = (DatanodeInfo) o2;</div><div class="line">            <span class="keyword">long</span> lu1 = d1.lastUpdate();</div><div class="line">            <span class="keyword">long</span> lu2 = d2.lastUpdate();</div><div class="line">            <span class="keyword">if</span> (lu1 &lt; lu2) &#123;</div><div class="line">                <span class="keyword">return</span> -<span class="number">1</span>;</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (lu1 &gt; lu2) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="number">1</span>;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">return</span> d1.getName().compareTo(d2.getName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">class</span> <span class="title">DatanodeInfo</span> </span>&#123;</div><div class="line"></div><div class="line">        <span class="keyword">private</span> <span class="keyword">long</span> capacityBytes, remainingBytes, lastUpdate;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">volatile</span> TreeSet blocks;</div><div class="line">        <span class="keyword">private</span> UTF8 name;</div><div class="line">        </div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">DatanodeInfo</span><span class="params">(UTF8 name, <span class="keyword">long</span> capacity, <span class="keyword">long</span> remaining)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.name = name;</div><div class="line">            <span class="keyword">this</span>.blocks = <span class="keyword">new</span> TreeSet();</div><div class="line">            updateHeartbeat(capacity, remaining);</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateHeartbeat</span><span class="params">(<span class="keyword">long</span> capacity, <span class="keyword">long</span> remaining)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.capacityBytes = capacity;</div><div class="line">            <span class="keyword">this</span>.remainingBytes = remaining;</div><div class="line">            <span class="keyword">this</span>.lastUpdate = System.currentTimeMillis();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">public</span> Block[] getBlocks() &#123;</div><div class="line">            <span class="keyword">return</span> (Block[]) blocks.toArray(<span class="keyword">new</span> Block[blocks.size()]);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> Iterator <span class="title">getBlockIterator</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> blocks.iterator();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getCapacity</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> capacityBytes;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getRemaining</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> remainingBytes;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">lastUpdate</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> lastUpdate;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> UTF8 <span class="title">getName</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> name;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">class</span> <span class="title">HeartbeatMonitorTask</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">                heartbeatCheck();</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    Thread.sleep(heartBeatRecheck);</div><div class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">heartbeatCheck</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">synchronized</span> (heartbeats) &#123;</div><div class="line">            DatanodeInfo nodeInfo = <span class="keyword">null</span>;</div><div class="line">            </div><div class="line">            <span class="keyword">while</span> ((heartbeats.size() &gt; <span class="number">0</span>) &amp;&amp; ((nodeInfo = (DatanodeInfo) heartbeats.first()) != <span class="keyword">null</span>)</div><div class="line">                    &amp;&amp; (nodeInfo.lastUpdate() &lt; System.currentTimeMillis() - EXPIRE_INTERVAL)) &#123;</div><div class="line">                LOG.info(<span class="string">"Lost heartbeat for "</span> + nodeInfo.getName());</div><div class="line"></div><div class="line">                heartbeats.remove(nodeInfo);</div><div class="line">                <span class="keyword">synchronized</span> (datanodeMap) &#123;</div><div class="line">                    datanodeMap.remove(nodeInfo.getName());</div><div class="line">                &#125;</div><div class="line">                totalCapacity -= nodeInfo.getCapacity();</div><div class="line">                totalRemaining -= nodeInfo.getRemaining();</div><div class="line"></div><div class="line">                Block deadblocks[] = nodeInfo.getBlocks();</div><div class="line">                <span class="keyword">if</span> (deadblocks != <span class="keyword">null</span>) &#123;</div><div class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; deadblocks.length; i++) &#123;</div><div class="line">                        removeStoredBlock(deadblocks[i], nodeInfo);</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (heartbeats.size() &gt; <span class="number">0</span>) &#123;</div><div class="line">                    nodeInfo = (DatanodeInfo) heartbeats.first();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">removeStoredBlock</span><span class="params">(Block block, DatanodeInfo node)</span> </span>&#123;</div><div class="line">        TreeSet containingNodes = (TreeSet) blocksMap.get(block);</div><div class="line">        <span class="keyword">if</span> (containingNodes == <span class="keyword">null</span> || !containingNodes.contains(node)) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</div><div class="line">                    <span class="string">"No machine mapping found for block "</span> + block + <span class="string">", which should be at node "</span> + node);</div><div class="line">        &#125;</div><div class="line">        containingNodes.remove(node);</div><div class="line"></div><div class="line">        <span class="comment">//</span></div><div class="line">        <span class="comment">// It's possible that the block was removed because of a datanode</span></div><div class="line">        <span class="comment">// failure. If the block is still valid, check if replication is</span></div><div class="line">        <span class="comment">// necessary. In that case, put block on a possibly-will-</span></div><div class="line">        <span class="comment">// be-replicated list.</span></div><div class="line">        <span class="comment">//</span></div><div class="line">        <span class="keyword">if</span> (dir.isValidBlock(block) &amp;&amp; (containingNodes.size() &lt; <span class="keyword">this</span>.desiredReplication)) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (neededReplications) &#123;</div><div class="line">                neededReplications.add(block);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">//</span></div><div class="line">        <span class="comment">// We've removed a block from a node, so it's definitely no longer</span></div><div class="line">        <span class="comment">// in "excess" there.</span></div><div class="line">        <span class="comment">//</span></div><div class="line">        TreeSet excessBlocks = (TreeSet) excessReplicateMap.get(node.getName());</div><div class="line">        <span class="keyword">if</span> (excessBlocks != <span class="keyword">null</span>) &#123;</div><div class="line">            excessBlocks.remove(block);</div><div class="line">            <span class="keyword">if</span> (excessBlocks.size() == <span class="number">0</span>) &#123;</div><div class="line">                excessReplicateMap.remove(node.getName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HeartbeatMonitorTest</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.hbthread = <span class="keyword">new</span> Daemon(<span class="keyword">new</span> HeartbeatMonitorTask(), <span class="string">"A"</span>);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">        String name = <span class="string">"JokerdeMacBook-Pro.local:50010"</span>;</div><div class="line">        <span class="keyword">long</span> capacity = <span class="number">250140434432L</span>;</div><div class="line">        <span class="keyword">long</span> remaining = <span class="number">98054681805L</span>;</div><div class="line">        UTF8 n = <span class="keyword">new</span> UTF8(name);</div><div class="line">        DatanodeInfo nodeinfo = <span class="keyword">new</span> DatanodeInfo(n, capacity, remaining);</div><div class="line">        <span class="keyword">this</span>.datanodeMap.put(n, nodeinfo);</div><div class="line">        <span class="keyword">this</span>.capacityDiff = capacity;</div><div class="line">        <span class="keyword">this</span>.remainingDiff = remaining;</div><div class="line">        <span class="keyword">this</span>.heartbeats.add(nodeinfo);</div><div class="line">        <span class="keyword">this</span>.hbthread.start();</div><div class="line">        <span class="keyword">this</span>.hbthread.join();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</div><div class="line">        HeartbeatMonitorTest task = <span class="keyword">new</span> HeartbeatMonitorTest();</div><div class="line">        task.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>到这里, 我们结束了整个流程，由DataNode向NameNode发送心跳。<br>NameNode判断当前节点是否超时，如果是则进行对应的操作，否则一直持续相关操作。</p>
+<p>最后在分享一些心跳监控的设计资源链接：<br><a href="http://liaojieliang.com/heartbeat-protocal-design/" target="_blank" rel="external">http://liaojieliang.com/heartbeat-protocal-design/</a><br><a href="http://blog.csdn.net/baidu20008/article/details/45022461" target="_blank" rel="external">http://blog.csdn.net/baidu20008/article/details/45022461</a><br><a href="http://www.raychase.net/3758" target="_blank" rel="external">http://www.raychase.net/3758</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>人生苦短，我要打赏!</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="https://github.com/basebase/img_server/blob/master/play/play.png?raw=true" alt="小墨鱼 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <footer class="post-footer">
+
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/19/Hadoop-NameNode启动之FSDirectiry/" rel="next" title="Hadoop NameNode启动之FSDirectiry">
+                <i class="fa fa-chevron-left"></i> Hadoop NameNode启动之FSDirectiry
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://i01.pictn.sogoucdn.com/f83a9e9b980ed956"
+               alt="小墨鱼" />
+          <p class="site-author-name" itemprop="name">小墨鱼</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码分析"><span class="nav-number">2.</span> <span class="nav-text">源码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#样例"><span class="nav-number">3.</span> <span class="nav-text">样例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结束语"><span class="nav-number">4.</span> <span class="nav-text">结束语</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小墨鱼</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user">本站访客数</i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人</span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye">本站总访问量</i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+    <script type="text/javascript">
+      var disqus_shortname = 'xiaomoyu';
+      var disqus_identifier = '2018/02/02/Hadoop-NameNode启动之心跳机制/';
+      var disqus_title = "Hadoop NameNode启动之心跳机制";
+      var disqus_url = 'http://yoursite.com/2018/02/02/Hadoop-NameNode启动之心跳机制/';
+
+      function run_disqus_script(disqus_script){
+        var dsq = document.createElement('script');
+        dsq.type = 'text/javascript';
+        dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      }
+
+      run_disqus_script('count.js');
+      
+        run_disqus_script('embed.js');
+      
+    </script>
+  
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+       search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+    'use strict';
+    $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+            // get the contents from search data
+            isfetched = true;
+            $('.popup').detach().appendTo('.header-inner');
+            var datas = $( "entry", xmlResponse ).map(function() {
+                return {
+                    title: $( "title", this ).text(),
+                    content: $("content",this).text(),
+                    url: $( "url" , this).text()
+                };
+            }).get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener('input', function(){
+                var matchcounts = 0;
+                var str='<ul class=\"search-result-list\">';
+                var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                $resultContent.innerHTML = "";
+                if (this.value.trim().length > 1) {
+                // perform local searching
+                datas.forEach(function(data) {
+                    var isMatch = true;
+                    var content_index = [];
+                    var data_title = data.title.trim().toLowerCase();
+                    var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                    var data_url = data.url;
+                    var index_title = -1;
+                    var index_content = -1;
+                    var first_occur = -1;
+                    // only match artiles with not empty titles and contents
+                    if(data_title != '' && data_content != '') {
+                        keywords.forEach(function(keyword, i) {
+                            index_title = data_title.indexOf(keyword);
+                            index_content = data_content.indexOf(keyword);
+                            if( index_title < 0 && index_content < 0 ){
+                                isMatch = false;
+                            } else {
+                                if (index_content < 0) {
+                                    index_content = 0;
+                                }
+                                if (i == 0) {
+                                    first_occur = index_content;
+                                }
+                            }
+                        });
+                    }
+                    // show search results
+                    if (isMatch) {
+                        matchcounts += 1;
+                        str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                        var content = data.content.trim().replace(/<[^>]+>/g,"");
+                        if (first_occur >= 0) {
+                            // cut out 100 characters
+                            var start = first_occur - 20;
+                            var end = first_occur + 80;
+                            if(start < 0){
+                                start = 0;
+                            }
+                            if(start == 0){
+                                end = 50;
+                            }
+                            if(end > content.length){
+                                end = content.length;
+                            }
+                            var match_content = content.substring(start, end);
+                            // highlight all keywords
+                            keywords.forEach(function(keyword){
+                                var regS = new RegExp(keyword, "gi");
+                                match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                            });
+
+                            str += "<p class=\"search-result\">" + match_content +"...</p>"
+                        }
+                        str += "</li>";
+                    }
+                })};
+                str += "</ul>";
+                if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+                if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+                $resultContent.innerHTML = str;
+            });
+            proceedsearch();
+        }
+    });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

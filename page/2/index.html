@@ -86,7 +86,7 @@
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="小墨鱼">
-<meta property="og:url" content="http://yoursite.com/archives/2017/03/index.html">
+<meta property="og:url" content="http://yoursite.com/page/2/index.html">
 <meta property="og:site_name" content="小墨鱼">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="小墨鱼">
@@ -110,9 +110,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/archives/2017/03/"/>
+  <link rel="canonical" href="http://yoursite.com/page/2/"/>
 
-  <title> 归档 | 小墨鱼 </title>
+  <title> 小墨鱼 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -142,7 +142,9 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  page-archive  ">
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -242,66 +244,128 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
+  <section id="posts" class="posts-expand">
+    
+      
 
-  <section id="posts" class="posts-collapse">
-    <span class="archive-move-on"></span>
 
-    <span class="archive-page-counter">
-      
-      
-      
-        
-      
-      嗯..! 目前共计 11 篇日志。 继续努力。
-    </span>
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+
+
+
+
+
+
 
     
-
-      
-      
-      
-
-      
+      <header class="post-header">
         
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2017">2017</h2>
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/08/11/storm整合kafka重复消费问题分析/" itemprop="url">
+                  storm整合kafka重复消费问题分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-11T21:43:29+08:00" content="2016-08-11">
+              2016-08-11
+            </time>
+          </span>
+
+          
+
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/08/11/storm整合kafka重复消费问题分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/08/11/storm整合kafka重复消费问题分析/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
         </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+
+
       
       
 
       
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h1 class="post-title">
         
-            <a class="post-title-link" href="/2017/03/05/mysql学习笔记-事务隔离级别/" itemprop="url">
-              
-                <span itemprop="name">mysql学习笔记-事务隔离级别</span>
-              
+          <p>为什么写这篇文章?<br>最近在整合storm+kafka一直纠结于重复数据的读取，重新启动topology更是把kafka的数据扫描一遍，<br>【如果线上逻辑较重，并且还要往数据库里面插入数据是不是有很多重复数据了！】</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/08/11/storm整合kafka重复消费问题分析/#more" rel="contents">
+              阅读全文 &raquo;
             </a>
+          </div>
         
-      </h1>
+      
+    </div>
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-03-05T19:52:57+08:00"
-              content="2017-03-05" >
-          03-05
-        </time>
-      </div>
+    <div>
+      
+    </div>
 
-    </header>
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
   </article>
 
 
-
     
-
   </section>
 
   
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
 
 
 
@@ -478,12 +542,6 @@
   
 
   
-  
-    <script type="text/javascript" id="motion.page.archive">
-      $('.archive-year').velocity('transition.slideLeftIn');
-    </script>
-  
-
 
   
 
@@ -500,7 +558,7 @@
 
     <script type="text/javascript">
       var disqus_shortname = 'xiaomoyu';
-      var disqus_identifier = 'archives/2017/03/index.html';
+      var disqus_identifier = 'page/2/index.html';
       var disqus_title = "";
       var disqus_url = '';
 
